@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 #include "Util/GameObject.hpp"
-#include "Util/Image.hpp"
+#include "Util/Animation.hpp" // We use Animation now instead of Image
 #include <vector>
 #include <memory>
 
@@ -18,21 +18,21 @@ public:
 
 private:
     void HandleInput();
-    void AdvanceFrame();
     void LoadSprites();
     void UpdateSprite();
+
 
     float m_Speed = 3.0f;
 
     Direction m_Direction = Direction::DOWN;
     State m_State = State::IDLE;
 
-    int m_Frame = 0;
-    int m_FrameTimer = 0;
-    int m_FrameDelay = 8;
-
-    // [0]=idle(7), [1]=down(8), [2]=up(8), [3]=left(8), [4]=right(8)
-    std::vector<std::vector<std::shared_ptr<Util::Image>>> m_Sprites;
+    std::shared_ptr<Util::Animation> m_AnimDown;
+    std::shared_ptr<Util::Animation> m_AnimUp;
+    std::shared_ptr<Util::Animation> m_AnimLeft;
+    std::shared_ptr<Util::Animation> m_AnimRight;
+    
+    std::shared_ptr<Util::Animation> m_CurrentAnimation;
 };
 
 #endif

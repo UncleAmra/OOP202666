@@ -6,106 +6,79 @@ Character::Character(float x, float y) {
     m_Transform.translation = {x, y};
     m_ZIndex = 1.0f;
     m_Visible = true;
+    m_State = State::IDLE;
+    m_Direction = Direction::DOWN;
+    m_Transform.scale = {3.0f, 3.0f};
+    
     LoadSprites();
     UpdateSprite();
 }
 
 void Character::LoadSprites() {
-    m_Sprites.resize(5);
+    // Define the sequences using your 12 new files
+    // The pattern is: Left foot (0), Stand (1), Right foot (2), Stand (1)
+    std::vector<std::string> downFrames  = {RESOURCE_DIR "/character_000.png",  RESOURCE_DIR "/character_001.png",  RESOURCE_DIR "/character_002.png",  RESOURCE_DIR "/character_000.png"};
+    std::vector<std::string> upFrames    = {RESOURCE_DIR "/character_003.png",    RESOURCE_DIR "/character_004.png",    RESOURCE_DIR "/character_005.png",    RESOURCE_DIR "/character_003.png"};
+    std::vector<std::string> leftFrames  = {RESOURCE_DIR "/character_006.png",  RESOURCE_DIR "/character_007.png",  RESOURCE_DIR "/character_008.png",  RESOURCE_DIR "/character_006.png"};
+    std::vector<std::string> rightFrames = {RESOURCE_DIR "/character_009.png", RESOURCE_DIR "/character_010.png", RESOURCE_DIR "/character_011.png", RESOURCE_DIR "/character_009.png"};
 
-    auto load = [](const std::string& path) {
-        return std::make_shared<Util::Image>(path);
-    };
+    // Initialize the animations (Paths, Play=false, Interval=150ms, Looping=true, Cooldown=0)
+    m_AnimDown  = std::make_shared<Util::Animation>(downFrames, false, 150, true, 0);
+    m_AnimUp    = std::make_shared<Util::Animation>(upFrames, false, 150, true, 0);
+    m_AnimLeft  = std::make_shared<Util::Animation>(leftFrames, false, 150, true, 0);
+    m_AnimRight = std::make_shared<Util::Animation>(rightFrames, false, 150, true, 0);
 
-    // idle — 7 frames
-    m_Sprites[0].resize(7);
-    for (int i = 0; i < 7; i++) {
-        std::string num = "00" + std::to_string(i);
-        m_Sprites[0][i] = load(RESOURCE_DIR "/idle_" + num + ".png");
-    }
-
-    // down & left — character_008 to 015
-    m_Sprites[1].resize(8);
-    m_Sprites[3].resize(8);
-    for (int i = 0; i < 8; i++) {
-        std::string num = (i + 8 < 10) ? "00" + std::to_string(i + 8) : "0" + std::to_string(i + 8);
-        m_Sprites[1][i] = load(RESOURCE_DIR "/character_" + num + ".png");
-        m_Sprites[3][i] = load(RESOURCE_DIR "/character_" + num + ".png");
-    }
-
-    // up & right — character_000 to 007
-    m_Sprites[2].resize(8);
-    m_Sprites[4].resize(8);
-    for (int i = 0; i < 8; i++) {
-        std::string num = "00" + std::to_string(i);
-        m_Sprites[2][i] = load(RESOURCE_DIR "/character_" + num + ".png");
-        m_Sprites[4][i] = load(RESOURCE_DIR "/character_" + num + ".png");
-    }
-}
-
-void Character::UpdateSprite() {
-    int spriteSet;
-    if (m_State == State::IDLE) {
-        spriteSet = 0;
-    } else {
-        switch (m_Direction) {
-            case Direction::DOWN:  spriteSet = 1; break;
-            case Direction::UP:    spriteSet = 2; break;
-            case Direction::LEFT:  spriteSet = 3; break;
-            case Direction::RIGHT: spriteSet = 4; break;
-            default:               spriteSet = 1; break;
-        }
-    }
-    m_Drawable = m_Sprites[spriteSet][m_Frame];
+    // Set default starting state
+    m_CurrentAnimation = m_AnimDown;
+    m_Drawable = m_CurrentAnimation;
 }
 
 void Character::HandleInput() {
-    State prevState = m_State;
-    Direction prevDir = m_Direction;
     m_State = State::IDLE;
 
-    if (Util::Input::IsKeyPressed(Util::Keycode::DOWN) ||
-        Util::Input::IsKeyPressed(Util::Keycode::S)) {
+    if (Util::Input::IsKeyPressed(Util::Keycode::DOWN) || Util::Input::IsKeyPressed(Util::Keycode::S)) {
         m_Transform.translation.y -= m_Speed;
         m_Direction = Direction::DOWN;
         m_State = State::MOVING;
-    } else if (Util::Input::IsKeyPressed(Util::Keycode::UP) ||
-               Util::Input::IsKeyPressed(Util::Keycode::W)) {
+    } else if (Util::Input::IsKeyPressed(Util::Keycode::UP) || Util::Input::IsKeyPressed(Util::Keycode::W)) {
         m_Transform.translation.y += m_Speed;
         m_Direction = Direction::UP;
         m_State = State::MOVING;
-    } else if (Util::Input::IsKeyPressed(Util::Keycode::LEFT) ||
-               Util::Input::IsKeyPressed(Util::Keycode::A)) {
+    } else if (Util::Input::IsKeyPressed(Util::Keycode::LEFT) || Util::Input::IsKeyPressed(Util::Keycode::A)) {
         m_Transform.translation.x -= m_Speed;
         m_Direction = Direction::LEFT;
         m_State = State::MOVING;
-    } else if (Util::Input::IsKeyPressed(Util::Keycode::RIGHT) ||
-               Util::Input::IsKeyPressed(Util::Keycode::D)) {
+    } else if (Util::Input::IsKeyPressed(Util::Keycode::RIGHT) || Util::Input::IsKeyPressed(Util::Keycode::D)) {
         m_Transform.translation.x += m_Speed;
         m_Direction = Direction::RIGHT;
         m_State = State::MOVING;
     }
-
-    // reset frame when state or direction changes
-    if (m_State != prevState || m_Direction != prevDir) {
-        m_Frame = 0;
-        m_FrameTimer = 0;
-    }
 }
 
-void Character::AdvanceFrame() {
-    int totalFrames = (m_State == State::IDLE) ? 7 : 8;
+void Character::UpdateSprite() {
+    // 1. Pick the animation based on the LAST KNOWN direction
+    switch (m_Direction) {
+        case Direction::DOWN:  m_CurrentAnimation = m_AnimDown;  break;
+        case Direction::UP:    m_CurrentAnimation = m_AnimUp;    break;
+        case Direction::LEFT:  m_CurrentAnimation = m_AnimLeft;  break;
+        case Direction::RIGHT: m_CurrentAnimation = m_AnimRight; break;
+    }
+    
+    m_Drawable = m_CurrentAnimation;
 
-    m_FrameTimer++;
-    if (m_FrameTimer >= m_FrameDelay) {
-        m_FrameTimer = 0;
-        m_Frame = (m_Frame + 1) % totalFrames;
+    // 2. Play if moving, or Snap to Stand if idle
+    if (m_State == State::MOVING) {
+        m_CurrentAnimation->Play(); 
+    } else {
+        m_CurrentAnimation->Pause();
+        // FORCE the flipbook to turn to page 1 (the standing frame)
+        m_CurrentAnimation->SetCurrentFrame(0); 
     }
 }
 
 void Character::Update() {
+    // Notice how clean this is now! No more AdvanceFrame().
     HandleInput();
-    AdvanceFrame();
     UpdateSprite();
-    Draw();  // GameObject::Draw() handles all the matrix stuff
+    Draw(); 
 }

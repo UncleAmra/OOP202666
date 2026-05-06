@@ -25,8 +25,8 @@ private:
     std::shared_ptr<Util::Text> m_Text;
     std::shared_ptr<Util::GameObject> m_CursorUI;
 
-    int m_CursorIndex = 0;
-    int m_PartySize = 0;
+    int m_CursorIndex   = 0;
+    int m_PartySize     = 0;
     
     void UpdateCursorPosition();
     void BuildPartyText(const std::vector<std::shared_ptr<Pokemon>>& party);

@@ -85,6 +85,10 @@ public:
 
     void SetVisible(bool visible);
     void LoadConnections(const std::string& filepath);
+    // New overload — accepts generated data directly, skips CSV loading
+    void LoadGeneratedLevel(const std::string& mapName,
+                        std::vector<std::vector<int>> groundData,
+                        std::vector<std::vector<int>> propData);
     
 private:
     // --- MAP DATA ---
@@ -108,7 +112,8 @@ private:
     void InitNPCRegistry(); 
     void InitItemRegistry();
     void AddToRenderer(std::shared_ptr<Util::GameObject> obj);
-    
+    void SpawnTilesAndProps();
+
     // --- ANIMATIONS ---
     std::shared_ptr<Util::Animation> m_LeaderWater;
     std::shared_ptr<Util::Animation> m_FollowerWater;

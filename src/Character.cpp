@@ -71,8 +71,7 @@ glm::vec2 Character::Update(std::shared_ptr<Map> map) {
         SetZIndex(dynamicZ);
     }
     
-    map->UpdatePropOverlap(m_GridX, m_GridY, 
-    m_Transform.translation.y - (GameConfig::SCALED_TILE_SIZE * 0.5f));
+    //map->UpdatePropOverlap(m_GridX, m_GridY, m_Transform.translation.y - (GameConfig::SCALED_TILE_SIZE * 0.5f));
 
     if (m_IsMoving) {
         // --- NEW: Multiply speed by Delta Time ---

@@ -21,6 +21,7 @@
 #include "RandomEncounters.hpp"
 #include "ResourceManager.hpp"
 #include "PokemonDatabase.hpp"
+#include "MapGenerator.hpp"
 
 const std::string RES      = std::string(RESOURCE_DIR);
 const std::string MAP_DIR  = RES + "/maps/";
@@ -404,23 +405,49 @@ void App::Update() {
                 }
             }
 
-            // B. MOVEMENT
             glm::vec2 movement = m_Character->Update(m_Map);
             m_Map->Move(-movement.x, -movement.y);
 
             // C. DOORS AND WARPING
             if (m_Character->HasHitDoor()) {
+
                 std::string doorKey = m_Map->GetCurrentLevelPath() + "_" + std::to_string(m_Character->GetGridX()) + "_" + std::to_string(m_Character->GetGridY());
+                printf("Attempting to find Door Key: [%s]\n", doorKey.c_str());
                 auto it = GameConfig::DoorRouting.find(doorKey);
                 
                 if (it != GameConfig::DoorRouting.end()) {
                     GameConfig::WarpDestination dest = it->second;
-                    m_Map->LoadLevel(dest.levelPath); 
-                    m_Character->SetGridPosition(dest.spawnX, dest.spawnY);
-                    m_Map->WarpTo(dest.spawnX, dest.spawnY);
+                    printf("Door found! Destination is: [%s]\n", dest.levelPath.c_str());
+                    // --- NEW: Intercept procedural generation triggers ---
+                    if (dest.levelPath.find("GENERATED_CAVE") != std::string::npos) {
+                        printf("GENERATED CAVE LOGIC TRIGGERED!\n");
+                        auto generated = MapGenerator::GenerateCave(40, 40);
+                        
+                        // Register the exit door to lead back to where the player just came from
+                        std::string exitKey = "GENERATED_CAVE_" 
+                                            + std::to_string(generated.spawnX) + "_" 
+                                            + std::to_string(generated.spawnY);
+                        GameConfig::DoorRouting[exitKey] = { m_Map->GetCurrentLevelPath(), 
+                                                             m_Character->GetGridX(), 
+                                                             m_Character->GetGridY() };
+                        
+                        m_Map->LoadGeneratedLevel("GENERATED_CAVE", generated.ground, generated.props);
+                        m_Character->SetGridPosition(generated.spawnX, generated.spawnY);
+                        m_Map->WarpTo(generated.spawnX, generated.spawnY);
+                    } 
+                    // --- EXISTING: Standard CSV level loading ---
+                    else {
+                        m_Map->LoadLevel(dest.levelPath); 
+                        m_Character->SetGridPosition(dest.spawnX, dest.spawnY);
+                        m_Map->WarpTo(dest.spawnX, dest.spawnY);
+                    }
+
+                    // Shared cleanup for both warp types
                     m_Character->StopMoving();
                     m_Character->ClearDoorFlag(); 
+
                 } else {
+                    // No door routing found for this tile
                     m_Character->ClearDoorFlag(); 
                 }
             }

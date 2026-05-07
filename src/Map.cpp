@@ -88,6 +88,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
+    m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING]      = { {PROP_DIR + "/TechBuilding.png"},          0.8f, true,  false, 0.0f,  -144.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING2]      = { {PROP_DIR + "/TechBuilding12.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING6]      = { {PROP_DIR + "/Building6.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_CAFETERIA_BUILDING]      = { {PROP_DIR + "/CafeteriaBuilding.png"},          0.8f, true,  false, 0.0f,  0.0f  };
@@ -238,18 +239,8 @@ void Map::LoadConnections(const std::string& filepath) {
 //  LEVEL LOADING
 // ─────────────────────────────────────────────
 
-void Map::LoadLevel(const std::string& mapName) {
-    ClearMap();
-    m_CurrentLevelPath = mapName;
-    m_LevelData = LoadCSV(mapName + "_ground.csv");
-    m_PropData  = LoadCSV(mapName + "_props.csv");
-
-    if (m_LevelData.empty()) {
-        std::cout << "Map Ground is EMPTY!" << std::endl;
-        return;
-    }
-
-    // Water animation: one leader drives timing, all followers sync to it
+void Map::SpawnTilesAndProps() {
+     // Water animation: one leader drives timing, all followers sync to it
     std::vector<std::string> waterPaths = {
         TILE_DIR + "/Water1.png", TILE_DIR + "/Water2.png", TILE_DIR + "/Water3.png",
         TILE_DIR + "/Water4.png", TILE_DIR + "/Water5.png", TILE_DIR + "/Water6.png",
@@ -355,10 +346,29 @@ void Map::LoadLevel(const std::string& mapName) {
         }
     }
 }
+void Map::LoadGeneratedLevel(const std::string& mapName, 
+                             std::vector<std::vector<int>> groundData, 
+                             std::vector<std::vector<int>> propData) {
+    ClearMap();
+    m_CurrentLevelPath = mapName;
+    m_LevelData = std::move(groundData);
+    m_PropData  = std::move(propData);
+    
+    if (m_LevelData.empty()) return;
+    
+    SpawnTilesAndProps();
+}
 
-// ─────────────────────────────────────────────
-//  UPDATE
-// ─────────────────────────────────────────────
+// Map.cpp — refactor LoadLevel to call this:
+void Map::LoadLevel(const std::string& mapName) {
+    ClearMap();
+    m_CurrentLevelPath = mapName;
+    m_LevelData = LoadCSV(mapName + "_ground.csv");
+    m_PropData  = LoadCSV(mapName + "_props.csv");
+    if (m_LevelData.empty()) return;
+    SpawnTilesAndProps();
+}
+
 
 void Map::Update() {
     // 1. Keep all water tiles in sync with the leader's frame
@@ -437,20 +447,44 @@ void Map::WarpTo(int gridX, int gridY) {
 //  QUERIES
 // ─────────────────────────────────────────────
 
+#include <cstdio> // Make sure this is at the top of your file for printf
+
 bool Map::IsWalkable(int x, int y) {
+    // 1. Check Bounds
     if (x < 0 || x >= (int)m_LevelData[0].size() ||
-        y < 0 || y >= (int)m_LevelData.size()) return false;
+        y < 0 || y >= (int)m_LevelData.size()) {
+        printf("WALK FAILED: Tile (%d, %d) is out of bounds!\n", x, y);
+        return false;
+    }
 
+    // 2. Check Ground Tile
     int tileID = m_LevelData[y][x];
-    if (m_TileRegistry.count(tileID) == 0)          return false;
-    if (!m_TileRegistry[tileID].isWalkable)          return false; // solid ground
+    if (m_TileRegistry.count(tileID) == 0) {
+        printf("WALK FAILED: Ground Tile ID %d is missing from registry!\n", tileID);
+        return false;
+    }
+    if (!m_TileRegistry[tileID].isWalkable) {
+        printf("WALK FAILED: Ground Tile ID %d is marked as solid!\n", tileID);
+        return false;
+    }
 
+    // 3. Check Props and Items
     int propID = m_PropData[y][x];
-    if (m_PropRegistry.count(propID) > 0 && !m_PropRegistry[propID].isWalkable) return false; // solid prop
-    if (m_ItemRegistry.count(propID) > 0)            return false; // unpicked item
+    if (m_PropRegistry.count(propID) > 0 && !m_PropRegistry[propID].isWalkable) {
+        printf("WALK FAILED: Blocked by solid Prop ID %d!\n", propID);
+        return false;
+    }
+    if (m_ItemRegistry.count(propID) > 0) {
+        printf("WALK FAILED: Blocked by unpicked Item ID %d!\n", propID);
+        return false;
+    }
 
+    // 4. Check NPCs
     for (const auto& npc : m_NPCs) {
-        if (npc->GetGridX() == x && npc->GetGridY() == y) return false;
+        if (npc->GetGridX() == x && npc->GetGridY() == y) {
+            printf("WALK FAILED: Blocked by an NPC at (%d, %d)!\n", x, y);
+            return false;
+        }
     }
 
     return true;
@@ -546,14 +580,4 @@ void Map::SetVisible(bool visible) {
 
 void Map::Draw() {
     // Intentionally empty — the Renderer handles all drawing.
-}
-
-void Map::UpdatePropOverlap(int playerGridX, int playerGridY, float playerFootY) {
-    for (auto& prop : m_Props) {
-        if (!prop->GetCanFadeOnOverlap()) continue;
-
-        // Same condition as dynamicZ — player's foot is above the prop's base row
-        bool isBehind = playerGridY < prop->GetGridY();
-        prop->SetOpacity(isBehind ? 0.4f : 1.0f);
-    }
 }

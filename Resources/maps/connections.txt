@@ -13,9 +13,9 @@ TechBuilding    3   9   ->  NTUT     34   11
 
 
 
-// Maze
-level    49  13  ->  maze     2   5
-maze     3   2   ->  level    51  14
+// GENERATED_CAVE
+level    49  13  ->  GENERATED_CAVE  4  2
+GENERATED_CAVE  4  2   ->  level    51  14
 
 // PokeMart
 level    28  8   ->  PokeMart 5   9

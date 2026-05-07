@@ -76,7 +76,9 @@ namespace GameConfig {
     constexpr int PROP_STAIRS_NORTH     = 76;
     constexpr int PROP_PALM_TREE        = 77;
     constexpr int PROP_UMBRELLA_STAND   = 78;
-    constexpr int PROP_WHITE_PILLAR   = 79;
+    constexpr int PROP_WHITE_PILLAR     = 79;
+    constexpr int PROP_LOG_up1          = 80;
+    constexpr int PROP_LOG_up2          = 81;
 
     constexpr int PROP_NTUT_BUILDING1       = 550;
     constexpr int PROP_NTUT_MOSS_BUILDING   = 551;
@@ -91,6 +93,7 @@ namespace GameConfig {
     constexpr int PROP_NTUT_BUILDING6       = 560;
     constexpr int PROP_NTUT_CAFETERIA_BUILDING  = 561;
     constexpr int PROP_NTUT_BUILDING7       = 562;
+    constexpr int PROP_NTUT_BUILDING8       = 563;
 
 
 

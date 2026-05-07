@@ -87,10 +87,9 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING3]      = { {PROP_DIR + "/Building3.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
-    m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING]      = { {PROP_DIR + "/TechBuilding.png"},          0.8f, true,  false, 0.0f,  -144.0f};
-    m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING2]      = { {PROP_DIR + "/TechBuilding12.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING6]      = { {PROP_DIR + "/Building6.png"},          0.8f, true,  false, 0.0f,  0.0f  };
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
+    m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING2]      = { {PROP_DIR + "/TechBuilding12.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_CAFETERIA_BUILDING]      = { {PROP_DIR + "/CafeteriaBuilding.png"},          0.8f, true,  false, 0.0f,  0.0f  };
 
 
@@ -132,13 +131,15 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_LAMP_POST]  = { {PROP_DIR + "/LampPost.png"},  0.8f, true, false, 0.0f,  0.0f   };
 
     // Log obstacles
-    m_PropRegistry[GameConfig::PROP_LOG_DOWN1]  = { {PROP_DIR + "/LogDown1.png"},  0.8f, true, false, 0.0f, 0.0f };
-    m_PropRegistry[GameConfig::PROP_LOG_DOWN2]  = { {PROP_DIR + "/LogDown2.png"},  0.8f, true, false, 0.0f, 0.0f };
-    m_PropRegistry[GameConfig::PROP_LOG_DOWN3]  = { {PROP_DIR + "/LogDown3.png"},  0.8f, true, false, 0.0f, 0.0f };
-    m_PropRegistry[GameConfig::PROP_LOG_LEFT1]  = { {PROP_DIR + "/LogLeft1.png"},  0.8f, true, false, 0.0f, 0.0f };
-    m_PropRegistry[GameConfig::PROP_LOG_LEFT2]  = { {PROP_DIR + "/LogLeft2.png"},  0.8f, true, false, 0.0f, 0.0f };
-    m_PropRegistry[GameConfig::PROP_LOG_LEFT3]  = { {PROP_DIR + "/LogLeft3.png"},  0.8f, true, false, 0.0f, 0.0f };
+    m_PropRegistry[GameConfig::PROP_LOG_DOWN1]  = { {PROP_DIR + "/wallstone_5.png"},  0.8f, true, false, 0.0f, 0.0f };
+    m_PropRegistry[GameConfig::PROP_LOG_DOWN2]  = { {PROP_DIR + "/wallstone_3.png"},  0.8f, true, false, 0.0f, 0.0f };
+    m_PropRegistry[GameConfig::PROP_LOG_DOWN3]  = { {PROP_DIR + "/wallstone_4.png"},  0.8f, true, false, 0.0f, 0.0f };
+    m_PropRegistry[GameConfig::PROP_LOG_LEFT1]  = { {PROP_DIR + "/wallstone_2.png"},  0.8f, true, false, 0.0f, 0.0f };
+    m_PropRegistry[GameConfig::PROP_LOG_LEFT2]  = { {PROP_DIR + "/wallstone_1.png"},  0.8f, true, false, 0.0f, 0.0f };
 
+    m_PropRegistry[GameConfig::PROP_LOG_up1]    = { {PROP_DIR + "/wallstone_7.png"},  0.8f, true, false, 0.0f, 0.0f };
+    m_PropRegistry[GameConfig::PROP_LOG_up2]    = { {PROP_DIR + "/wallstone_6.png"},  0.8f, true, false, 0.0f, 0.0f };
+ 
     // Animated doors
     m_PropRegistry[GameConfig::DOOR_OPENING_GYM] = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.0f, true, true,  2.0f,  20.0f };
     m_PropRegistry[GameConfig::DOOR_OPENING_PC]  = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.0f, true, true,  0.0f,  16.0f };

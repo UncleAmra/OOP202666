@@ -91,6 +91,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING2]      = { {PROP_DIR + "/TechBuilding12.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_CAFETERIA_BUILDING]      = { {PROP_DIR + "/CafeteriaBuilding.png"},          0.8f, true,  false, 0.0f,  0.0f  };
+    m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING]      = { {PROP_DIR + "/TechBuilding.png"},          0.8f, true,  false, 0.0f,  -144.0f};
 
 
 

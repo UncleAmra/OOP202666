@@ -94,6 +94,7 @@ namespace GameConfig {
     constexpr int PROP_NTUT_CAFETERIA_BUILDING  = 561;
     constexpr int PROP_NTUT_BUILDING7       = 562;
     constexpr int PROP_NTUT_BUILDING8       = 563;
+    constexpr int PROP_NTUT_BUILDING9       = 564;
 
 
 

@@ -1,0 +1,30 @@
+{
+    "direction": 2,
+    "flags": {},
+    "gridX": 12,
+    "gridY": 8,
+    "inventory": {},
+    "lootedItems": [],
+    "mapPath": "C:/Users/User/Desktop/OOP_GAME/OOP202666/Resources/maps/level",
+    "party": [
+        {
+            "atk": 52,
+            "catchRate": 45,
+            "currentHp": 39,
+            "def": 43,
+            "exp": 0,
+            "level": 5,
+            "maxHp": 39,
+            "moves": [
+                "Scratch",
+                "Growl"
+            ],
+            "name": "Charmander",
+            "spa": 60,
+            "spd": 50,
+            "spe": 65,
+            "type1": 2,
+            "type2": 0
+        }
+    ]
+}

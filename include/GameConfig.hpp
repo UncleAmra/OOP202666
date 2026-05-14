@@ -7,7 +7,7 @@
 
 namespace GameConfig {
     constexpr float TILE_SIZE   = 16.0f;
-    constexpr float SCALE       = 4.0f;
+    constexpr float SCALE       = 2.0f;
     constexpr float SCALED_TILE_SIZE    = TILE_SIZE * SCALE; // 48.0f
     constexpr float EFFECTIVE_TILE_SIZE = SCALED_TILE_SIZE - 0.1f; 
 
@@ -79,6 +79,7 @@ namespace GameConfig {
     constexpr int PROP_WHITE_PILLAR     = 79;
     constexpr int PROP_LOG_up1          = 80;
     constexpr int PROP_LOG_up2          = 81;
+    constexpr int STAIRS_LEFT1          = 82;
 
     constexpr int PROP_NTUT_BUILDING1       = 550;
     constexpr int PROP_NTUT_MOSS_BUILDING   = 551;

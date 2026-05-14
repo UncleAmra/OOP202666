@@ -61,8 +61,7 @@ void Prop::SetAnimMode(PropAnimMode mode, int frameDelay) {
 void Prop::Update() {
     // --- 1. DYNAMIC Z-SORTING ---
     if (m_UseDynamicZ) {
-        float footY = m_Transform.translation.y 
-                    - (GameConfig::SCALED_TILE_SIZE * 0.5f);
+        float footY = m_Transform.translation.y - (GameConfig::SCALED_TILE_SIZE * 0.5f);
         float dynamicZ = 0.5f - (footY / 10000.0f);
         SetZIndex(dynamicZ);
     }

@@ -1,11 +1,11 @@
 {
     "direction": 2,
     "flags": {},
-    "gridX": 12,
-    "gridY": 8,
+    "gridX": 14,
+    "gridY": 53,
     "inventory": {},
     "lootedItems": [],
-    "mapPath": "C:/Users/User/Desktop/OOP_GAME/OOP202666/Resources/maps/level",
+    "mapPath": "C:/Users/User/Desktop/OOP_GAME/OOP202666/Resources/maps/NTUT",
     "party": [
         {
             "atk": 52,

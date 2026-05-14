@@ -81,21 +81,16 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_CHURCH]              = { {PROP_DIR + "/Church.png"},             0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::WOODEN_HOUSE]             = { {PROP_DIR + "/wood_house.png"},         0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::POKEMART]                 = { {PROP_DIR + "/PokeMart.png"},           0.8f, true,  false, 24.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING1]      = { {PROP_DIR + "/NTUT_Building1.png"},     0.8f, true,  false, 0.0f,  0.0f  };
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING1]      = { {PROP_DIR + "/ntut_build_6.png"},       0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_MOSS_BUILDING]  = { {PROP_DIR + "/ntut_build_1.png"},       0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING2]      = { {PROP_DIR + "/Building2.png"},          0.8f, true,  false, 0.0f,  0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING3]      = { {PROP_DIR + "/Building3.png"},          0.8f, true,  false, 0.0f,  0.0f  };
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING3]      = { {PROP_DIR + "/ntut_build_5.png"},       0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 24.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING6]      = { {PROP_DIR + "/Building6.png"},          0.8f, true,  false, 0.0f,  0.0f  };
-<<<<<<< HEAD
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING8]      = { {PROP_DIR + "/ntut_build_3.png"},       0.8f, true,  false, 0.0f,  0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING9]      = { {PROP_DIR + "/ntut_build_4.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
-=======
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING8]      = { {PROP_DIR + "/ntut_build_3.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
->>>>>>> b987eefe556bf6e7cfffe05d45f69290293d2796
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING8]      = { {PROP_DIR + "/ntut_build_3.png"},       0.8f, true,  false, 0.0f,  0.0f  };
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING9]      = { {PROP_DIR + "/ntut_build_4.png"},       0.8f, true,  false, 0.0f,  0.0f  };     
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING2]      = { {PROP_DIR + "/TechBuilding12.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_CAFETERIA_BUILDING]      = { {PROP_DIR + "/CafeteriaBuilding.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING]      = { {PROP_DIR + "/TechBuilding.png"},          0.8f, true,  false, 0.0f,  -144.0f};
@@ -120,6 +115,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_TRUCK1]     = { {PROP_DIR + "/Truck.png"}, 0.8f, true,  false, 0.0f, 10.0f  };
     m_PropRegistry[GameConfig::PROP_UMBRELLA_STAND]     = { {PROP_DIR + "/UmbrellaStand.png"}, 0.4f, true,  false, 0.0f, 0.0f  };
     m_PropRegistry[GameConfig::PROP_WHITE_PILLAR]     = { {PROP_DIR + "/WhitePillar.png"}, 0.4f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig:: STAIRS_LEFT1 ]     = { {PROP_DIR + "/stair_left.png"}, 0.4f, true,  false, 0.0f, 0.0f  };
 
 
 
@@ -131,12 +127,13 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_PC_WALL_RIGHT] = { {PROP_DIR + "/PCWall3.png"},      0.3f, false, false, 0.0f,  0.0f   };
 
     // Nature props
-    m_PropRegistry[GameConfig::PROP_TREE]       = { {PROP_DIR + "/Tree.png"},      0.8f, true, true,  20.0f, -16.0f };
-    m_PropRegistry[GameConfig::PROP_PALM_TREE]       = { {PROP_DIR + "/PalmTree.png"},      0.8f, true, true,  20.0f, -16.0f };
-    m_PropRegistry[GameConfig::PROP_SMALL_TREE] = { {PROP_DIR + "/SmallTree.png"}, 0.8f, true, false, 0.0f,  0.0f   };
-    m_PropRegistry[GameConfig::PROP_TALL_TREE] = { {PROP_DIR + "/TallTree.png"}, 0.9f, true, false, 0.0f,  0.0f   };
+    m_PropRegistry[GameConfig::PROP_TREE]        = { {PROP_DIR + "/Tree.png"},      0.8f, true, true,  20.0f, -16.0f };
+    m_PropRegistry[GameConfig::PROP_PALM_TREE]   = { {PROP_DIR + "/PalmTree.png"},  0.8f, true, true,  20.0f, -16.0f };
+    m_PropRegistry[GameConfig::PROP_SMALL_TREE]  = { {PROP_DIR + "/SmallTree.png"}, 0.8f, true, false, 0.0f,  0.0f   };
+    m_PropRegistry[GameConfig::PROP_TALL_TREE]   = { {PROP_DIR + "/TallTree.png"},  0.9f, true, true,  0.0f,  0.0f   };
 
     m_PropRegistry[GameConfig::PROP_LAMP_POST]  = { {PROP_DIR + "/LampPost.png"},  0.8f, true, false, 0.0f,  0.0f   };
+
 
     // Log obstacles
     m_PropRegistry[GameConfig::PROP_LOG_DOWN1]  = { {PROP_DIR + "/wallstone_5.png"},  0.8f, true, false, 0.0f, 0.0f };
@@ -144,7 +141,6 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_LOG_DOWN3]  = { {PROP_DIR + "/wallstone_4.png"},  0.8f, true, false, 0.0f, 0.0f };
     m_PropRegistry[GameConfig::PROP_LOG_LEFT1]  = { {PROP_DIR + "/wallstone_2.png"},  0.8f, true, false, 0.0f, 0.0f };
     m_PropRegistry[GameConfig::PROP_LOG_LEFT2]  = { {PROP_DIR + "/wallstone_1.png"},  0.8f, true, false, 0.0f, 0.0f };
-
     m_PropRegistry[GameConfig::PROP_LOG_up1]    = { {PROP_DIR + "/wallstone_7.png"},  0.8f, true, false, 0.0f, 0.0f };
     m_PropRegistry[GameConfig::PROP_LOG_up2]    = { {PROP_DIR + "/wallstone_6.png"},  0.8f, true, false, 0.0f, 0.0f };
  

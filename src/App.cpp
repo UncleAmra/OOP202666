@@ -71,9 +71,9 @@ void App::Start() {
         }
     } else {
         GameConfig::LootedItems.clear(); 
-        m_Map->LoadLevel(MAP_DIR + "level"); 
-        m_Character->SetGridPosition(10, 10); 
-        m_Map->WarpTo(10, 10);
+        m_Map->LoadLevel(MAP_DIR + "NTUT"); 
+        m_Character->SetGridPosition(14, 53); 
+        m_Map->WarpTo(14, 53);
         // Give starter for testing
         auto starter = std::make_shared<Pokemon>(
         "Charmander", 5,

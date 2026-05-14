@@ -86,7 +86,8 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING2]      = { {PROP_DIR + "/Building2.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING3]      = { {PROP_DIR + "/ntut_build_5.png"},       0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 24.0f,  0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  0.0f  };
+    //558
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, -16.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING6]      = { {PROP_DIR + "/Building6.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING7]      = { {PROP_DIR + "/ntut_build_2.png"},       0.8f, true,  false, 0.0f,  0.0f  };    
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING8]      = { {PROP_DIR + "/ntut_build_3.png"},       0.8f, true,  false, 0.0f,  0.0f  };

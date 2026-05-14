@@ -53,10 +53,13 @@ public:
     bool TryCatchPokemon(std::shared_ptr<Pokemon> target, float ballMultiplier);
     TurnResult ExecuteEnemyMove();
     TurnResult ProcessEnemyTurn();
+    std::string GetLastEnemyMove() const { return m_LastEnemyMove; }
+
 
 
 private:
     bool m_IsWildBattle;
+    std::string m_LastEnemyMove;
     std::shared_ptr<Pokemon> m_PlayerPokemon;
     std::shared_ptr<Pokemon> m_EnemyPokemon;
     BattleState m_State = BattleState::SELECTING_ACTION;

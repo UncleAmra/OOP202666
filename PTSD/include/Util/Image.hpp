@@ -60,6 +60,9 @@ public:
      * @param zIndex The z-index at which to draw the image.
      */
     void Draw(const Core::Matrices &data) override;
+    // ADD THIS:
+    void SetSrcRect(int x, int y, int w, int h);
+
 
 private:
     void InitProgram();
@@ -79,6 +82,9 @@ private:
 
     std::string m_Path;
     glm::vec2 m_Size;
+    
+    glm::vec4 m_UVRect = {0.0f, 0.0f, 1.0f, 1.0f};
+
 };
 } // namespace Util
 

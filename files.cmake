@@ -19,6 +19,8 @@ set(SRC_FILES
     PokeballAnimator.cpp
     BattleAnimator.cpp
     MapGenerator.cpp
+    BattleAnimation.cpp
+    AnimationPlayer.cpp
 
 
 
@@ -49,7 +51,8 @@ set(INCLUDE_FILES
     PokeballAnimator.hpp
     BattleAnimator.hpp
     MapGenerator.hpp
-
+    BattleAnimation.hpp
+    AnimationPlayer.hpp
 )
 
 set(TEST_FILES

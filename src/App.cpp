@@ -22,6 +22,7 @@
 #include "ResourceManager.hpp"
 #include "PokemonDatabase.hpp"
 #include "MapGenerator.hpp"
+#include "BattleAnimation.hpp"
 
 const std::string RES      = std::string(RESOURCE_DIR);
 const std::string MAP_DIR  = RES + "/maps/";
@@ -43,7 +44,21 @@ void App::Start() {
     m_Character = std::make_shared<Player>(0.0f, 0.0f);
     m_Renderer->AddChild(m_Character); 
 
-    m_BattleUI = std::make_shared<BattleUI>(m_Renderer);   
+    m_BattleUI = std::make_shared<BattleUI>(m_Renderer);  
+    
+    // Use the Singleton to load the JSON directly!
+    try {
+        AnimationLibrary::Get().LoadFromJson(RES + "/data/pkmn_animations.json"); 
+        
+        if (AnimationLibrary::Get().Find("Move:THUNDERSHOCK") != nullptr) {
+            LOG_INFO("SUCCESS! THUNDERSHOCK loaded into the library!");
+        } else {
+            LOG_WARN("File parsed, but THUNDERSHOCK is still missing.");
+        }
+    } catch (const std::exception& e) {
+        LOG_ERROR("JSON Error: {}", e.what());
+    }
+
     m_InventoryMenu = std::make_shared<InventoryMenu>(m_Renderer);
     m_BattleUI->SetInventoryMenu(m_InventoryMenu);
 

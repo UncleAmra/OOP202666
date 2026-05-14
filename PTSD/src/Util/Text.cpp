@@ -49,6 +49,9 @@ void Text::Draw(const Core::Matrices &data) {
 
     m_Texture->Bind(UNIFORM_SURFACE_LOCATION);
     s_Program->Bind();
+
+    GLint uvLocation = glGetUniformLocation(s_Program->GetId(), "u_UVRect");
+    glUniform4f(uvLocation, 0.0f, 0.0f, 1.0f, 1.0f);
     s_Program->Validate();
 
     s_VertexArray->Bind();

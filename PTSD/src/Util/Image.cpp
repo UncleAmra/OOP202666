@@ -59,11 +59,19 @@ void Image::Draw(const Core::Matrices &data) {
 
     m_Texture->Bind(UNIFORM_SURFACE_LOCATION);
     s_Program->Bind();
+
+    // --- NEW CODE: Send the UV Rect to the shader ---
+    // We use your existing s_Program->GetId() to find the uniform location
+    GLint uvLocation = glGetUniformLocation(s_Program->GetId(), "u_UVRect");
+    glUniform4f(uvLocation, m_UVRect.x, m_UVRect.y, m_UVRect.z, m_UVRect.w);
+    // ------------------------------------------------
+
     s_Program->Validate();
 
     s_VertexArray->Bind();
     s_VertexArray->DrawTriangles();
 }
+
 
 void Image::InitProgram() {
     // TODO: Create `BaseProgram` from `Program` and pass it into `Drawable`
@@ -110,6 +118,18 @@ void Image::InitVertexArray() {
             0, 2, 3, //
         }));
     // NOLINTEND
+}
+
+// --- NEW CODE: Implement SetSrcRect ---
+void Image::SetSrcRect(int x, int y, int w, int h) {
+    // m_Size already contains your texture dimensions!
+    float texW = static_cast<float>(m_Size.x); 
+    float texH = static_cast<float>(m_Size.y);
+
+    m_UVRect.x = static_cast<float>(x) / texW;   // U offset
+    m_UVRect.y = static_cast<float>(y) / texH;   // V offset
+    m_UVRect.z = static_cast<float>(w) / texW;   // U scale
+    m_UVRect.w = static_cast<float>(h) / texH;   // V scale
 }
 
 std::unique_ptr<Core::Program> Image::s_Program = nullptr;

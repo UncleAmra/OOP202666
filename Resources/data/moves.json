@@ -1,0 +1,87 @@
+{
+  "Tackle": { "type": "NORMAL", "category": "PHYSICAL", "power": 40, "accuracy": 100, "pp": 35, "animation_key": "Move:TACKLE" },
+  "Scratch": { "type": "NORMAL", "category": "PHYSICAL", "power": 40, "accuracy": 100, "pp": 35, "animation_key": "Move:SCRATCH" },
+  "Quick Attack": { "type": "NORMAL", "category": "PHYSICAL", "power": 40, "accuracy": 100, "pp": 30, "animation_key": "Move:QUICKATTACK" },
+  "Hyper Fang": { "type": "NORMAL", "category": "PHYSICAL", "power": 80, "accuracy": 90, "pp": 15, "animation_key": "Move:HYPERFANG" },
+  "Growl": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 40, "animation_key": "" },
+  "Tail Whip": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 30, "animation_key": "" },
+  "Smokescreen": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 20, "animation_key": "" },
+  "Rage": { "type": "NORMAL", "category": "PHYSICAL", "power": 20, "accuracy": 100, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Slash": { "type": "NORMAL", "category": "PHYSICAL", "power": 70, "accuracy": 100, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Sweet Scent": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 20, "animation_key": "" },
+  "Disable": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 20, "animation_key": "" },
+  "Recover": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 10, "animation_key": "" },
+  "Screech": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 85, "pp": 40, "animation_key": "" },
+  "Wrap": { "type": "NORMAL", "category": "PHYSICAL", "power": 15, "accuracy": 90, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Leer": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 30, "animation_key": "" },
+  "Glare": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 30, "animation_key": "" },
+  "Fury Attack": { "type": "NORMAL", "category": "PHYSICAL", "power": 15, "accuracy": 85, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Super Fang": { "type": "NORMAL", "category": "PHYSICAL", "power": 0, "accuracy": 90, "pp": 10, "animation_key": "Move:TACKLE" },
+  "Double-Edge": { "type": "NORMAL", "category": "PHYSICAL", "power": 120, "accuracy": 100, "pp": 15, "animation_key": "Move:TACKLE" },
+  "Explosion": { "type": "NORMAL", "category": "PHYSICAL", "power": 250, "accuracy": 100, "pp": 5, "animation_key": "Move:TACKLE" },
+  "Sword Dance": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 20, "animation_key": "" },
+  "Swift": { "type": "NORMAL", "category": "SPECIAL", "power": 60, "accuracy": 0, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Hyper Beam": { "type": "NORMAL", "category": "SPECIAL", "power": 150, "accuracy": 90, "pp": 5, "animation_key": "Move:TACKLE" },
+  "Extreme Speed": { "type": "NORMAL", "category": "PHYSICAL", "power": 80, "accuracy": 100, "pp": 5, "animation_key": "Move:TACKLE" },
+  "Metronome": { "type": "NORMAL", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 10, "animation_key": "" },
+  "Flail": { "type": "NORMAL", "category": "PHYSICAL", "power": 0, "accuracy": 100, "pp": 15, "animation_key": "Move:TACKLE" },
+
+  "Ember": { "type": "FIRE", "category": "SPECIAL", "power": 40, "accuracy": 100, "pp": 25, "animation_key": "Move:EMBER" },
+  "Flamethrower": { "type": "FIRE", "category": "SPECIAL", "power": 90, "accuracy": 100, "pp": 15, "animation_key": "Move:EMBER" },
+  "Fire Blast": { "type": "FIRE", "category": "SPECIAL", "power": 110, "accuracy": 85, "pp": 5, "animation_key": "Move:EMBER" },
+  "Fire Spin": { "type": "FIRE", "category": "SPECIAL", "power": 35, "accuracy": 85, "pp": 15, "animation_key": "Move:EMBER" },
+  "Flame Wheel": { "type": "FIRE", "category": "PHYSICAL", "power": 60, "accuracy": 100, "pp": 25, "animation_key": "Move:EMBER" },
+
+  "Water Gun": { "type": "WATER", "category": "SPECIAL", "power": 40, "accuracy": 100, "pp": 25, "animation_key": "Move:WATERGUN" },
+  "Surf": { "type": "WATER", "category": "SPECIAL", "power": 90, "accuracy": 100, "pp": 15, "animation_key": "Move:WATERGUN" },
+  "Bubble": { "type": "WATER", "category": "SPECIAL", "power": 40, "accuracy": 100, "pp": 30, "animation_key": "Move:WATERGUN" },
+  "Withdraw": { "type": "WATER", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 40, "animation_key": "" },
+  "Hydro Pump": { "type": "WATER", "category": "SPECIAL", "power": 110, "accuracy": 80, "pp": 5, "animation_key": "Move:WATERGUN" },
+  "Rain Dance": { "type": "WATER", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 5, "animation_key": "" },
+
+  "Vine Whip": { "type": "GRASS", "category": "PHYSICAL", "power": 45, "accuracy": 100, "pp": 25, "animation_key": "Move:VINE_WHIP" },
+  "Razor Leaf": { "type": "GRASS", "category": "PHYSICAL", "power": 55, "accuracy": 95, "pp": 25, "animation_key": "Move:VINE_WHIP" },
+  "Solar Beam": { "type": "GRASS", "category": "SPECIAL", "power": 120, "accuracy": 100, "pp": 10, "animation_key": "Move:VINE_WHIP" },
+  "Leech Seed": { "type": "GRASS", "category": "STATUS", "power": 0, "accuracy": 90, "pp": 10, "animation_key": "" },
+  "Petal Dance": { "type": "GRASS", "category": "SPECIAL", "power": 120, "accuracy": 100, "pp": 10, "animation_key": "Move:VINE_WHIP" },
+  "Stun Spore": { "type": "GRASS", "category": "STATUS", "power": 0, "accuracy": 75, "pp": 30, "animation_key": "" },
+  "Absorb": { "type": "GRASS", "category": "SPECIAL", "power": 20, "accuracy": 100, "pp": 25, "animation_key": "Move:VINE_WHIP" },
+  "Synthesis": { "type": "GRASS", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 5, "animation_key": "" },
+
+  "Thunder Shock": { "type": "ELECTRIC", "category": "SPECIAL", "power": 40, "accuracy": 100, "pp": 30, "animation_key": "Move:THUNDERSHOCK" },
+  "Thunderbolt": { "type": "ELECTRIC", "category": "SPECIAL", "power": 90, "accuracy": 100, "pp": 15, "animation_key": "Move:THUNDERSHOCK" },
+
+  "Confusion": { "type": "PSYCHIC", "category": "SPECIAL", "power": 50, "accuracy": 100, "pp": 25, "animation_key": "Move:TACKLE" },
+  "Psychic": { "type": "PSYCHIC", "category": "SPECIAL", "power": 90, "accuracy": 100, "pp": 10, "animation_key": "Move:TACKLE" },
+  "Teleport": { "type": "PSYCHIC", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 20, "animation_key": "" },
+  "Kinesis": { "type": "PSYCHIC", "category": "STATUS", "power": 0, "accuracy": 80, "pp": 15, "animation_key": "" },
+  "Agility": { "type": "PSYCHIC", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 30, "animation_key": "" },
+  "Reflect": { "type": "PSYCHIC", "category": "STATUS", "power": 0, "accuracy": 0, "pp": 20, "animation_key": "" },
+
+  "Karate Chop": { "type": "FIGHTING", "category": "PHYSICAL", "power": 50, "accuracy": 100, "pp": 25, "animation_key": "Move:TACKLE" },
+  "Low Kick": { "type": "FIGHTING", "category": "PHYSICAL", "power": 50, "accuracy": 90, "pp": 20, "animation_key": "Move:TACKLE" },
+
+  "Rock Throw": { "type": "ROCK", "category": "PHYSICAL", "power": 50, "accuracy": 90, "pp": 15, "animation_key": "Move:TACKLE" },
+  "Rock Slide": { "type": "ROCK", "category": "PHYSICAL", "power": 75, "accuracy": 90, "pp": 10, "animation_key": "Move:TACKLE" },
+
+  "Poison Sting": { "type": "POISON", "category": "PHYSICAL", "power": 15, "accuracy": 100, "pp": 35, "animation_key": "Move:TACKLE" },
+  "Acid": { "type": "POISON", "category": "SPECIAL", "power": 40, "accuracy": 100, "pp": 30, "animation_key": "Move:TACKLE" },
+
+  "Bite": { "type": "DARK", "category": "PHYSICAL", "power": 60, "accuracy": 100, "pp": 25, "animation_key": "Move:TACKLE" },
+  "Crunch": { "type": "DARK", "category": "PHYSICAL", "power": 80, "accuracy": 100, "pp": 15, "animation_key": "Move:TACKLE" },
+
+  "Drill Peck": { "type": "FLYING", "category": "PHYSICAL", "power": 80, "accuracy": 100, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Wing Attack": { "type": "FLYING", "category": "PHYSICAL", "power": 60, "accuracy": 100, "pp": 35, "animation_key": "Move:TACKLE" },
+
+  "Earthquake": { "type": "GROUND", "category": "PHYSICAL", "power": 100, "accuracy": 100, "pp": 10, "animation_key": "Move:TACKLE" },
+
+  "Dragon Rage": { "type": "DRAGON", "category": "SPECIAL", "power": 0, "accuracy": 100, "pp": 10, "animation_key": "Move:TACKLE" },
+
+  "Pin Missile": { "type": "BUG", "category": "PHYSICAL", "power": 25, "accuracy": 95, "pp": 20, "animation_key": "Move:TACKLE" },
+  "Twineedle": { "type": "BUG", "category": "PHYSICAL", "power": 25, "accuracy": 100, "pp": 20, "animation_key": "Move:TACKLE" },
+
+  "Confuse Ray": { "type": "GHOST", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 10, "animation_key": "" },
+
+  "Sweet Kiss": { "type": "FAIRY", "category": "STATUS", "power": 0, "accuracy": 75, "pp": 10, "animation_key": "" },
+  "Charm": { "type": "FAIRY", "category": "STATUS", "power": 0, "accuracy": 100, "pp": 20, "animation_key": "" }
+}

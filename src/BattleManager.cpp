@@ -7,8 +7,8 @@
 
 BattleManager::BattleManager(std::shared_ptr<Pokemon> playerPokemon, std::shared_ptr<Pokemon> enemyPokemon, bool isWild)
     : m_PlayerPokemon(playerPokemon)
-    , m_EnemyPokemon(enemyPokemon)
     , m_IsWildBattle(isWild)
+    , m_EnemyPokemon(enemyPokemon)
     , m_State(BattleState::SELECTING_ACTION) {
 }
 
@@ -112,7 +112,7 @@ int BattleManager::CalculateDamage(Pokemon* attacker, Pokemon* defender,
     }
 
     const MoveData& move = MoveDatabase::GetMove(moveName);
-
+    LOG_INFO("[BattleManager] Move '{}' animation_key = '{}'", moveName, move.animation_key);
     if (move.category == MoveCategory::STATUS) return 0;
     if (move.power <= 0) return 0;
 
@@ -280,6 +280,9 @@ BattleManager::TurnResult BattleManager::SelectMove(int moveIndex) {
 // ==========================================
 // EXECUTE PLAYER MOVE
 // ==========================================
+// ==========================================
+// EXECUTE PLAYER MOVE
+// ==========================================
 BattleManager::TurnResult BattleManager::ExecutePlayerMove(int moveIndex) {
     TurnResult result;
     result.playerFainted = false;
@@ -288,48 +291,38 @@ BattleManager::TurnResult BattleManager::ExecutePlayerMove(int moveIndex) {
 
     auto moves = m_PlayerPokemon->GetMoves();
     const std::string& moveName = moves[moveIndex];
+    const MoveData& moveData = MoveDatabase::GetMove(moveName);
 
     result.message = m_PlayerPokemon->GetName() + " used " + moveName + "!";
 
-    if (!MoveDatabase::HasMove(moveName)) {
-        result.message += " (Unknown move)";
-        return result;
-    }
-
-    const MoveData& move = MoveDatabase::GetMove(moveName);
-
-    // Accuracy check
-    if (!AccuracyCheck(move.accuracy)) {
+    // 1. Accuracy Check
+    if (!AccuracyCheck(moveData.accuracy)) {
         result.message += "\n" + m_PlayerPokemon->GetName() + "'s attack missed!";
         return result;
     }
 
-    if (move.category == MoveCategory::STATUS) {
-        result.message += "\n(Status move — not yet implemented)";
-        return result;
-    }
+    // 2. Animation Tag
+    //result.message += "\n[ANIM:" + moveData.animation_key + ":TARGET_ENEMY]";
 
-    int damage = CalculateDamage(
-        m_PlayerPokemon.get(),
-        m_EnemyPokemon.get(),
-        moveName);
-
+    // 3. Damage Calculation & Application
+    int damage = CalculateDamage(m_PlayerPokemon.get(), m_EnemyPokemon.get(), moveName);
     m_EnemyPokemon->TakeDamage(damage);
-    //result.message += "\nDealt " + std::to_string(damage) + " damage!";
 
-    std::string effMsg = EffectivenessMessage(move.type, m_EnemyPokemon.get());
+    // 4. THE MISSING LINK: Sync Tag
+    // We send the NEW current HP to the UI so it can animate the bar and check for 0
+    result.message += "\n[SYNC_ENEMY]" + std::to_string(m_EnemyPokemon->GetCurrentHP());
+
+    // 5. Effectiveness
+    std::string effMsg = EffectivenessMessage(moveData.type, m_EnemyPokemon.get());
     if (!effMsg.empty()) result.message += "\n" + effMsg;
 
+    // 6. Faint Check
     if (m_EnemyPokemon->IsFainted()) {
         result.enemyFainted = true;
         result.message += "\n" + m_EnemyPokemon->GetName() + " fainted!";
 
-        // EXP calculation — simplified Gen 1 formula
-        // base_exp * level / 7
         result.expGained = (m_EnemyPokemon->GetLevel() * 50) / 7;
-        result.message += "\n" + m_PlayerPokemon->GetName()
-                        + " gained " + std::to_string(result.expGained) + " EXP!";
-
+        result.message += "\n" + m_PlayerPokemon->GetName() + " gained " + std::to_string(result.expGained) + " EXP!";
         m_PlayerPokemon->GainExp(result.expGained);
     }
 
@@ -339,48 +332,35 @@ BattleManager::TurnResult BattleManager::ExecutePlayerMove(int moveIndex) {
 // ==========================================
 // EXECUTE ENEMY MOVE (simple random AI)
 // ==========================================
+// ==========================================
+// EXECUTE ENEMY MOVE (simple random AI)
+// ==========================================
 BattleManager::TurnResult BattleManager::ExecuteEnemyMove() {
     TurnResult result;
     result.playerFainted = false;
     result.enemyFainted = false;
-    result.expGained = 0;
 
     auto moves = m_EnemyPokemon->GetMoves();
-    if (moves.empty()) {
-        result.message = m_EnemyPokemon->GetName() + " has no moves!";
-        return result;
-    }
-
-    // Pick a random move
     int moveIndex = rand() % (int)moves.size();
     const std::string& moveName = moves[moveIndex];
+    const MoveData& move = MoveDatabase::GetMove(moveName);
 
     result.message = m_EnemyPokemon->GetName() + " used " + moveName + "!";
-
-    if (!MoveDatabase::HasMove(moveName)) {
-        result.message += " (Unknown move)";
-        return result;
-    }
-
-    const MoveData& move = MoveDatabase::GetMove(moveName);
 
     if (!AccuracyCheck(move.accuracy)) {
         result.message += "\n" + m_EnemyPokemon->GetName() + "'s attack missed!";
         return result;
     }
 
-    if (move.category == MoveCategory::STATUS) {
-        result.message += "\n(Status move — not yet implemented)";
-        return result;
-    }
+    // Animation Tag
+    result.message += "\n[ANIM:" + move.animation_key + ":TARGET_PLAYER]";
 
-    int damage = CalculateDamage(
-        m_EnemyPokemon.get(),
-        m_PlayerPokemon.get(),
-        moveName);
-
+    // Damage & Sync
+    int damage = CalculateDamage(m_EnemyPokemon.get(), m_PlayerPokemon.get(), moveName);
     m_PlayerPokemon->TakeDamage(damage);
-    //result.message += "\nDealt " + std::to_string(damage) + " damage!";
+
+    // INJECT SYNC TAG: Updates player's HP bar and triggers player faint if HP <= 0
+    result.message += "\n[SYNC_PLAYER]" + std::to_string(m_PlayerPokemon->GetCurrentHP());
 
     std::string effMsg = EffectivenessMessage(move.type, m_PlayerPokemon.get());
     if (!effMsg.empty()) result.message += "\n" + effMsg;
@@ -392,7 +372,6 @@ BattleManager::TurnResult BattleManager::ExecuteEnemyMove() {
 
     return result;
 }
-
 // ==========================================
 // THROW POKEBALL
 // ==========================================

@@ -2,22 +2,26 @@
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
+#include "string"
+#include <iostream>
+
 
 BattleAnimator::BattleAnimator(std::shared_ptr<Util::GameObject> playerSprite,
                                std::shared_ptr<Util::GameObject> enemySprite,
                                std::shared_ptr<Util::Renderer> renderer)
-    : m_PlayerSprite(playerSprite), m_EnemySprite(enemySprite) {
-    
-    // Initialize the effect sprite and add it to the renderer
+    : m_PlayerSprite(playerSprite)
+    , m_EnemySprite(enemySprite)
+    , m_SheetCache([](const std::string& path) { return std::make_shared<Util::Image>(path); }) // <-- ADD THIS
+{
+    // OLD effect sprite
     m_EffectSprite = std::make_shared<Util::GameObject>();
-    m_EffectSprite->SetZIndex(100); // Draw on top of everything
+    m_EffectSprite->SetZIndex(100);
     m_EffectSprite->SetVisible(false);
-    
-    if (renderer) {
-        renderer->AddChild(m_EffectSprite);
-    }
-}
+    if (renderer) renderer->AddChild(m_EffectSprite);
 
+    // NEW — the actual animation player
+    m_AnimPlayer = std::make_shared<AnimationPlayer>(renderer, m_SheetCache, 20);
+}
 BattlerVisualState& BattleAnimator::GetState(BattleSide side) {
     return (side == BattleSide::PLAYER) ? m_PlayerState : m_EnemyState;
 }
@@ -29,125 +33,9 @@ bool BattleAnimator::IsBusy() const {
            m_EnemyShakeTimer > 0.0f ||
            m_PlayerLungeTimer > 0.0f ||
            m_EnemyLungeTimer > 0.0f ||
-           m_ActiveEffect.isPlaying ||
+           (m_AnimPlayer && m_AnimPlayer->IsPlaying()) ||
            m_PlayerFainting ||
            m_EnemyFainting;
-}
-
-void BattleAnimator::Update(float deltaTime) {
-    // Increment base animation time for idle bobbing
-    m_AnimTime += 1.0f; 
-
-    // ==========================================
-    // 1. UPDATE HP BARS (Smooth Lerp)
-    // ==========================================
-    if (m_DrainingEnemyHP) {
-        if (m_EnemyHPPercent > m_EnemyHPTarget) {
-            m_EnemyHPPercent -= m_EnemyHPDrainSpeed; // Use deltaTime if your engine isn't frame-locked
-            if (m_EnemyHPPercent <= m_EnemyHPTarget) m_DrainingEnemyHP = false;
-        } else if (m_EnemyHPPercent < m_EnemyHPTarget) {
-            m_EnemyHPPercent += m_EnemyHPDrainSpeed; // Handle Healing
-            if (m_EnemyHPPercent >= m_EnemyHPTarget) m_DrainingEnemyHP = false;
-        } else {
-             m_DrainingEnemyHP = false; 
-        }
-    }
-
-    if (m_DrainingPlayerHP) {
-        if (m_PlayerHPPercent > m_PlayerHPTarget) {
-            m_PlayerHPPercent -= m_PlayerHPDrainSpeed;
-            if (m_PlayerHPPercent <= m_PlayerHPTarget) m_DrainingPlayerHP = false;
-        } else if (m_PlayerHPPercent < m_PlayerHPTarget) {
-            m_PlayerHPPercent += m_PlayerHPDrainSpeed; // Handle Healing
-            if (m_PlayerHPPercent >= m_PlayerHPTarget) m_DrainingPlayerHP = false;
-        } else {
-            m_DrainingPlayerHP = false;
-        }
-    }
-
-    // Ensure HP never goes out of bounds
-    m_EnemyHPPercent = std::clamp(m_EnemyHPPercent, 0.0f, 1.0f);
-    m_PlayerHPPercent = std::clamp(m_PlayerHPPercent, 0.0f, 1.0f);
-
-    // ==========================================
-    // 2. UPDATE ACTION OFFSETS (Lunges & Shakes)
-    // ==========================================
-    // Player Shaking / Lunging
-    if (m_PlayerLungeTimer > 0.0f) {
-        m_PlayerLungeTimer -= 1.0f;
-        m_PlayerState.offsetX = 40.0f; // Jump forward
-    } else if (m_PlayerShakeTimer > 0.0f) {
-        m_PlayerShakeTimer -= 1.0f;
-        m_PlayerState.offsetX = (rand() % (int)(m_PlayerShakeIntensity * 2)) - m_PlayerShakeIntensity;
-    } else {
-        m_PlayerState.offsetX = 0.0f;
-    }
-
-    // Enemy Shaking / Lunging
-    if (m_EnemyLungeTimer > 0.0f) {
-        m_EnemyLungeTimer -= 1.0f;
-        m_EnemyState.offsetX = -40.0f; // Jump forward (left)
-    } else if (m_EnemyShakeTimer > 0.0f) {
-        m_EnemyShakeTimer -= 1.0f;
-        m_EnemyState.offsetX = (rand() % (int)(m_EnemyShakeIntensity * 2)) - m_EnemyShakeIntensity;
-    } else {
-        m_EnemyState.offsetX = 0.0f;
-    }
-
-    // ==========================================
-    // 3. UPDATE FAINTING
-    // ==========================================
-    if (m_EnemyFainting) {
-        m_EnemyState.offsetY -= 5.0f; // Changed to minus!
-        if (m_EnemyState.offsetY < -150.0f) { // Check for negative!
-            m_EnemySprite->SetVisible(false);
-            m_EnemyFainting = false;
-        }
-    }
-
-    if (m_PlayerFainting) {
-        m_PlayerState.offsetY -= 5.0f; // Changed to minus!
-        if (m_PlayerState.offsetY < -150.0f) { // Check for negative!
-            m_PlayerSprite->SetVisible(false);
-            m_PlayerFainting = false;
-        }
-    }
-
-    // ==========================================
-    // 4. UPDATE ATTACK SPRITESHEET
-    // ==========================================
-    if (m_ActiveEffect.isPlaying) {
-        m_ActiveEffect.frameTimer += deltaTime; // Use standard time here if possible
-        if (m_ActiveEffect.frameTimer >= m_ActiveEffect.timePerFrame) {
-            m_ActiveEffect.frameTimer = 0.0f;
-            m_ActiveEffect.currentFrame++;
-
-            if (m_ActiveEffect.currentFrame >= m_ActiveEffect.totalFrames) {
-                m_ActiveEffect.isPlaying = false;
-                m_EffectSprite->SetVisible(false);
-            } else {
-                // TODO: Update UV rect or switch texture for m_EffectSprite based on currentFrame
-                // m_EffectSprite->SetDrawable(...);
-            }
-        }
-    }
-
-    // ==========================================
-    // 5. APPLY FINAL TRANSFORMS TO GAMEOBJECTS
-    // ==========================================
-    // Add procedural bobbing directly onto the base + action offsets
-    float playerBob = std::sin(m_AnimTime * 0.04f) * 2.5f; 
-    float enemyBob = std::sin(m_AnimTime * 0.03f) * 1.5f;
-
-    if (m_PlayerSprite) {
-        m_PlayerSprite->m_Transform.translation.x = PLAYER_BASE_X + m_PlayerState.offsetX;
-        m_PlayerSprite->m_Transform.translation.y = PLAYER_BASE_Y + playerBob + m_PlayerState.offsetY;
-    }
-
-    if (m_EnemySprite) {
-        m_EnemySprite->m_Transform.translation.x = ENEMY_BASE_X + m_EnemyState.offsetX;
-        m_EnemySprite->m_Transform.translation.y = ENEMY_BASE_Y + enemyBob + m_EnemyState.offsetY;
-    }
 }
 
 // ==========================================
@@ -187,21 +75,86 @@ void BattleAnimator::PlayFaint(BattleSide side) {
     else m_EnemyFainting = true;
 }
 
-void BattleAnimator::PlayAttackEffect(const std::string& texturePath, int frames, BattleSide target) {
-    m_ActiveEffect.isPlaying = true;
-    m_ActiveEffect.texturePath = texturePath;
-    m_ActiveEffect.totalFrames = frames;
-    m_ActiveEffect.currentFrame = 0;
-    m_ActiveEffect.frameTimer = 0.0f;
-    m_ActiveEffect.targetSide = target;
+void BattleAnimator::PlayAttackEffect(const BattleAnimDef& def, 
+                                      BattleSide target, 
+                                      std::function<void()> onFinished) 
+{
+    if (!m_AnimPlayer) return;
 
-    m_EffectSprite->SetVisible(true);
-    
-    // Position the effect exactly over the target
-    if (target == BattleSide::ENEMY) {
-        m_EffectSprite->m_Transform.translation = { ENEMY_BASE_X, ENEMY_BASE_Y };
-    } else {
-        m_EffectSprite->m_Transform.translation = { PLAYER_BASE_X, PLAYER_BASE_Y };
+    glm::vec2 playerPos = { PLAYER_BASE_X, PLAYER_BASE_Y };
+    glm::vec2 enemyPos  = { ENEMY_BASE_X,  ENEMY_BASE_Y  };
+
+    glm::vec2 userPos   = (target == BattleSide::ENEMY) ? playerPos : enemyPos;
+    glm::vec2 targetPos = (target == BattleSide::ENEMY) ? enemyPos  : playerPos;
+
+    m_IsPlayingEffect = true;
+
+    // We pass a lambda that cleans up local state AND notifies the UI.
+    // The AnimPlayer will store and call this once its frames run out.
+    m_AnimPlayer->Play(def, userPos, targetPos, [this, onFinished]() {
+        LOG_INFO("[BattleAnimator] AnimPlayer signal received: Cleaning up.");
+        this->m_IsPlayingEffect = false; 
+        if (onFinished) {
+            onFinished(); // This sets m_IsMoveAnimating = false in BattleUI
+        }
+    });
+}
+
+void BattleAnimator::Update(float dt) {
+    // 1. Tick the Move Animation Player (Cels/Sprites)
+    if (m_AnimPlayer) {
+        m_AnimPlayer->Update(dt);
+    }
+
+    // 2. Tick Shake/Lunge timers
+    if (m_PlayerShakeTimer > 0) m_PlayerShakeTimer -= dt;
+    if (m_EnemyShakeTimer > 0)  m_EnemyShakeTimer -= dt;
+    if (m_PlayerLungeTimer > 0) m_PlayerLungeTimer -= dt;
+    if (m_EnemyLungeTimer > 0)  m_EnemyLungeTimer -= dt;
+
+    // 3. Handle HP Bar Draining
+    auto updateHP = [&](bool& draining, float& current, float target, float speed) {
+        if (!draining) return;
+        float step = speed * (dt / 10.0f); // Adjust speed to ms
+        if (std::abs(current - target) <= step) {
+            current = target;
+            draining = false;
+        } else {
+            current += (current < target) ? step : -step;
+        }
+    };
+    updateHP(m_DrainingPlayerHP, m_PlayerHPPercent, m_PlayerHPTarget, m_PlayerHPDrainSpeed);
+    updateHP(m_DrainingEnemyHP, m_EnemyHPPercent, m_EnemyHPTarget, m_EnemyHPDrainSpeed);
+
+    // 4. Handle Fainting Visual (Sliding down)
+    if (m_PlayerFainting) {
+        m_PlayerState.offsetY -= 600.0f * (dt / 1000.0f); 
+        if (m_PlayerState.offsetY < -300.0f) {
+            m_PlayerFainting = false;
+            m_PlayerSprite->SetVisible(false);
+        }
+    }
+    if (m_EnemyFainting) {
+        m_EnemyState.offsetY -= 600.0f * (dt / 1000.0f);
+        if (m_EnemyState.offsetY < -300.0f) {
+            m_EnemyFainting = false;
+            m_EnemySprite->SetVisible(false);
+        }
+    }
+
+    // 5. APPLY ALL OFFSETS TO THE ACTUAL SPRITES
+    // This is the part that actually moves the images on screen!
+    if (m_PlayerSprite) {
+        m_PlayerSprite->m_Transform.translation = {
+            PLAYER_BASE_X + m_PlayerState.offsetX,
+            PLAYER_BASE_Y + m_PlayerState.offsetY
+        };
+    }
+    if (m_EnemySprite) {
+        m_EnemySprite->m_Transform.translation = {
+            ENEMY_BASE_X + m_EnemyState.offsetX,
+            ENEMY_BASE_Y + m_EnemyState.offsetY
+        };
     }
 }
 

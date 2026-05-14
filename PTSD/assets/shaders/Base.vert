@@ -10,10 +10,14 @@ layout(std140) uniform Matrices {
     mat4 viewProjection;
 };
 
+// Our new uniform for spritesheet rendering
+uniform vec4 u_UVRect;
+
 void main() {
     // Reference from
     // https://github.com/NOOBDY/Indigo/blob/f31c7ef82c610d8e91214892a7a1e3f860ba4aaa/assets/shaders/base_pass.vert#L21-L22
     gl_Position = viewProjection * model * vec4(vertPosition, 0, 1);
 
-    uv = vertUv;
+    // Multiply the engine's base UV by our scale, then add the offset
+    uv = (vertUv * u_UVRect.zw) + u_UVRect.xy;
 }

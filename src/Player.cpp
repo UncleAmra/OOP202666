@@ -8,7 +8,7 @@ Player::Player(float x, float y) : Character(x, y) {
     m_BaseZIndex = 0.5f;
     LoadSprites();
     //m_FootOffsetY += 8.0f;
-    m_Transform.translation.y -= 14.0f;
+    m_Transform.translation.y -= 12.0f;
     // 2. Snap to the first frame
     UpdateSprite(); 
     

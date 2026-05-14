@@ -18,6 +18,7 @@ struct MoveData {
     int power;
     int accuracy;      // 1 to 100
     int maxPP;
+    std::string animation_key;
 };
 
 class MoveDatabase {

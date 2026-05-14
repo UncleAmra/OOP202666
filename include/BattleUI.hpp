@@ -11,12 +11,22 @@
 #include "Util/Renderer.hpp"
 #include "ResourceManager.hpp"
 #include "Util/Text.hpp"
+#include "Util/AssetStore.hpp" // Make sure this is included at the top of your header!
+
+// --- NEW INCLUDES ---
+#include "AnimationPlayer.hpp"
+#include "BattleAnimation.hpp"
+#include "MoveDatabase.hpp"
+
 #include <memory>
 #include <cmath>   // For std::sin
 #include <cstdlib> // For rand()
 #include <vector>
 #include <queue>      
 #include <sstream>
+
+
+class BattleAnimator;
 
 class BattleUI {
 public:
@@ -27,24 +37,31 @@ public:
     void SetPlayer(std::shared_ptr<Player> player) { 
         m_Player = player; 
     }
+    
+    // --- NEW SETTER ---
+    void SetAnimationLibrary(std::shared_ptr<AnimationLibrary> animLib) {
+        m_AnimLibrary = animLib;
+    }
    
     void Show(std::vector<std::shared_ptr<Pokemon>> playerParty, std::shared_ptr<Pokemon> wildPokemon);
     void Hide();
     bool Update();
     bool IsBattleOver() const { return m_BattleOver; }
-    void StartTrainerBattle(std::vector<std::shared_ptr<Pokemon>> playerParty, std::vector<std::shared_ptr<Pokemon>> enemyParty);private:
-    
-   
+    void StartTrainerBattle(std::vector<std::shared_ptr<Pokemon>> playerParty, std::vector<std::shared_ptr<Pokemon>> enemyParty);
+
+private:
     enum class UIState {
-            ANIMATING,
-            MAIN_MENU,
-            MOVE_MENU,
-            WAITING_TEXT,
-            POKEMON_MENU,
-            BAG_MENU,
-            CATCH_ANIMATION
-            //BATTLE_ESCAPED
-        };
+        ANIMATING,
+        MAIN_MENU,
+        MOVE_MENU,
+        WAITING_TEXT,
+        POKEMON_MENU,
+        BAG_MENU,
+        CATCH_ANIMATION
+    };
+
+    
+
     std::shared_ptr<Pokemon> m_PlayerPokemon;
     std::shared_ptr<Pokemon> m_EnemyPokemon;
     bool m_EscapeSuccessful = false;
@@ -86,19 +103,15 @@ public:
     std::shared_ptr<Util::GameObject> m_EnemyPanel;
     std::shared_ptr<Util::Text> m_EnemyNameText;
 
-    // Keep the GameObjects you already have:
     std::shared_ptr<Util::GameObject> m_PlayerLevelText;
     std::shared_ptr<Util::GameObject> m_EnemyLevelText;
 
-    // ADD THESE: Direct pointers to the text components
     std::shared_ptr<Util::Text> m_PlayerLevelTextDrawable;
     std::shared_ptr<Util::Text> m_EnemyLevelTextDrawable;
 
-        // UI GameObjects for the bars and text
     std::shared_ptr<Util::GameObject> m_PlayerHPBar;
     std::shared_ptr<Util::GameObject> m_EnemyHPBar;
     std::shared_ptr<Util::GameObject> m_PlayerEXPBar;
-    //std::shared_ptr<Util::Text> m_PlayerHPText;
     std::shared_ptr<Util::GameObject> m_PlayerHPTextObj;
 
     // ==========================================
@@ -113,7 +126,6 @@ public:
     std::shared_ptr<Util::GameObject> m_CommandBox; 
     std::shared_ptr<Util::GameObject> m_MenuCursor;
     std::shared_ptr<Util::GameObject> m_MoveBox;
-    // (We will add the actual health bar fill later once the text works!)
 
     int m_IntroAnimTimer = 0;
     bool m_IsIntroAnimating = false;
@@ -128,8 +140,8 @@ public:
     int m_SlideTimer = 0;
     int m_TextWaitTimer = 0;
 
-    int m_AnimTime = 0;         // For the continuous breathing sine wave
-    int m_PlayerLungeTimer = 0; // For the attack lunge
+    int m_AnimTime = 0;         
+    int m_PlayerLungeTimer = 0; 
     int m_EnemyShakeTimer = 0;
 
     std::queue<std::string> m_DialogueQueue;
@@ -142,9 +154,9 @@ public:
     bool m_AllowEXPAnimation = false;
     int m_TargetPlayerHP = 0;
     int m_TargetEnemyHP = 0;
-    float m_VisualPlayerHP = 0.0f; // Float for smooth draining
+    float m_VisualPlayerHP = 0.0f; 
     float m_VisualEnemyHP = 0.0f;
-    // Add this under your private/protected functions:
+    
     void ProcessNextMessage();
 
     bool m_BattleOver = false;
@@ -155,17 +167,33 @@ public:
     std::shared_ptr<PokemonMenu> m_PokemonMenu;
     std::unique_ptr<BattleAnimator> m_Animator;
 
+
+    // BattleUI.hpp — in the private section
+// Replace whatever you currently have for m_SheetCache with:
+    Util::AssetStore<std::shared_ptr<Util::Image>> m_SheetCache{
+        [](const std::string& path) {
+            return std::make_shared<Util::Image>(path);
+        }
+    };
+    
+    // --- NEW ANIMATION SYSTEM VARIABLES ---
+    bool m_IsMoveAnimating = false;
+    std::shared_ptr<AnimationPlayer> m_AnimPlayer;
+    //Util::AssetStore<std::shared_ptr<Util::Image>> m_AnimAssets; 
+    std::shared_ptr<AnimationLibrary> m_AnimLibrary;
+    // --------------------------------------
+
     std::shared_ptr<Util::GameObject> m_PokeballSprite;
     int m_CatchPhaseTimer = 0;
-    int m_CatchShakes = 0;         // How many times it has wobbled
-    int m_TargetShakes = 3;        // How many times it SHOULD wobble based on catch rate
+    int m_CatchShakes = 0;        
+    int m_TargetShakes = 3;        
     bool m_CatchWillSucceed = false;
     std::shared_ptr<PokeballAnimator> m_PokeballAnimator;
 
-    // Starting and ending points for the throw arc
-    glm::vec2 m_ThrowStart = {-270.0f, -50.0f}; // Player position
-    glm::vec2 m_ThrowEnd = {400.0f, 150.0f};    // Enemy position
+    glm::vec2 m_ThrowStart = {-270.0f, -50.0f}; 
+    glm::vec2 m_ThrowEnd = {400.0f, 150.0f};    
 
-    // Helper to scale bars cleanly from the left side
     void UpdateBar(std::shared_ptr<Util::GameObject> bar, float percent, float leftEdgeX, float fixedY, float maxScale, bool isHPBar);
+    int m_MoveAnimatingTimeout = 0;
+
 };

@@ -1,8 +1,11 @@
 #pragma once
-
+#include "BattleUI.hpp"
+#include "AnimationPlayer.hpp"
+#include "BattleAnimation.hpp"
 #include "Util/GameObject.hpp"
 #include "Util/Renderer.hpp"
 #include <string>
+#include <functional>
 #include <memory>
 
 // Identifies which side is being targeted by an animation
@@ -52,7 +55,9 @@ public:
     void AnimateHPDrain(BattleSide side, float startPercent, float targetPercent, float speed = 0.01f);
 
     // 3. Attack Effects
-    void PlayAttackEffect(const std::string& texturePath, int frames, BattleSide target);
+    void PlayAttackEffect(const BattleAnimDef& def, 
+                          BattleSide target, 
+                          std::function<void()> onFinished = nullptr);
 
     // --- GATEKEEPERS & GETTERS ---
     // Returns true if ANY animation is currently happening (UI should pause text)
@@ -63,12 +68,16 @@ public:
     float GetEnemyHPPercent() const { return m_EnemyHPPercent; }
     // Resets a specific side back to idle 
     void ResetState(BattleSide side);
+    bool IsPlayingEffect() const { return m_IsPlayingEffect; }
 
 private:
     // --- ENGINE COMPONENTS ---
     std::shared_ptr<Util::GameObject> m_PlayerSprite;
     std::shared_ptr<Util::GameObject> m_EnemySprite;
     std::shared_ptr<Util::GameObject> m_EffectSprite; 
+    std::shared_ptr<AnimationPlayer> m_AnimPlayer;
+    std::function<void()> m_OnMoveComplete = nullptr;
+    bool m_IsPlayingEffect = false;
 
     // --- HARDCODED ANCHORS (From your BattleUI) ---
     const float PLAYER_BASE_X = -270.0f;
@@ -109,4 +118,9 @@ private:
 
     // Helper to fetch the right state struct
     BattlerVisualState& GetState(BattleSide side);
+    Util::AssetStore<std::shared_ptr<Util::Image>> m_SheetCache{
+        [](const std::string& path) {
+            return std::make_shared<Util::Image>(path);
+        }
+    };
 };

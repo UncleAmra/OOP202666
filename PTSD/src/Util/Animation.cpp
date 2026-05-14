@@ -37,6 +37,7 @@ void Animation::Play() {
         m_IsChangeFrame = false;
     }
     m_State = State::PLAY;
+    
 }
 
 void Animation::Pause() {

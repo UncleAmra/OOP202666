@@ -101,21 +101,21 @@ void Map::InitPropRegistry() {
     // Checkpoints / gates
     m_PropRegistry[GameConfig::PROP_CHECKPOINT]    = { {PROP_DIR + "/Checkpoint2.png"}, 0.8f, true,  false, 0.0f, 96.0f };
     m_PropRegistry[GameConfig::PROP_CHECKPOINT2]   = { {PROP_DIR + "/Checkpoint3.png"}, 0.8f, true,  false, 0.0f, 96.0f };
-    m_PropRegistry[GameConfig::PROP_GATE_TOP]      = { {PROP_DIR + "/GateTopEnd.png"},  0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_GATE_MIDDLE]   = { {PROP_DIR + "/GateMiddle.png"},  0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_GATE_MIDDLE2]  = { {PROP_DIR + "/GateMiddle2.png"}, 0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_GATE_MIDDLE3]  = { {PROP_DIR + "/GateMiddle3.png"}, 0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_GATE_END]      = { {PROP_DIR + "/GateBotEnd.png"},  0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_GATE_TOP2]     = { {PROP_DIR + "/GateTopEnd2.png"}, 0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_GATE_END2]     = { {PROP_DIR + "/GateBotEnd2.png"}, 0.1f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_STAIRS_NORTH]     = { {PROP_DIR + "/Stairs_North.png"}, 0.4f, false,  true, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_TOP]      = { {PROP_DIR + "/GateTopEnd.png"},  0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_MIDDLE]   = { {PROP_DIR + "/GateMiddle.png"},  0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_MIDDLE2]  = { {PROP_DIR + "/GateMiddle2.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_MIDDLE3]  = { {PROP_DIR + "/GateMiddle3.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_END]      = { {PROP_DIR + "/GateBotEnd.png"},  0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_TOP2]     = { {PROP_DIR + "/GateTopEnd2.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_GATE_END2]     = { {PROP_DIR + "/GateBotEnd2.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_STAIRS_NORTH]     = { {PROP_DIR + "/Stairs_North.png"}, 0.8f, false,  true, 0.0f, 0.0f  };
 
     //Decoration
     //m_PropRegistry[GameConfig::PROP_NTUT_SCREEN]     = { {PROP_DIR + "/NTUT_Screen.png"}, 0.7f, true,  true, 0.0f, 0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BALL_STATUE]     = { {PROP_DIR + "/NTUT_Ball.png"}, 1.0f, true,  false, 0.0f, 0.0f  };
     m_PropRegistry[GameConfig::PROP_TRUCK1]     = { {PROP_DIR + "/Truck.png"}, 0.8f, true,  false, 0.0f, 10.0f  };
-    m_PropRegistry[GameConfig::PROP_UMBRELLA_STAND]     = { {PROP_DIR + "/UmbrellaStand.png"}, 0.4f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_WHITE_PILLAR]     = { {PROP_DIR + "/WhitePillar.png"}, 0.4f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_UMBRELLA_STAND]     = { {PROP_DIR + "/UmbrellaStand.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_WHITE_PILLAR]     = { {PROP_DIR + "/WhitePillar.png"}, 0.5f, true,  false, 0.0f, 0.0f  };
     m_PropRegistry[GameConfig:: STAIRS_LEFT1 ]     = { {PROP_DIR + "/stair_left.png"}, 0.4f, true,  false, 0.0f, 0.0f  };
 
 
@@ -131,7 +131,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_TREE]        = { {PROP_DIR + "/Tree.png"},      0.8f, true, true,  20.0f, -16.0f };
     m_PropRegistry[GameConfig::PROP_PALM_TREE]   = { {PROP_DIR + "/PalmTree.png"},  0.8f, true, true,  20.0f, -16.0f };
     m_PropRegistry[GameConfig::PROP_SMALL_TREE]  = { {PROP_DIR + "/SmallTree.png"}, 0.8f, true, false, 0.0f,  0.0f   };
-    m_PropRegistry[GameConfig::PROP_TALL_TREE]   = { {PROP_DIR + "/TallTree.png"},  0.9f, true, true,  0.0f,  0.0f   };
+    m_PropRegistry[GameConfig::PROP_TALL_TREE]   = { {PROP_DIR + "/TallTree.png"},  0.8f, true, true,  0.0f,  0.0f   };
 
     m_PropRegistry[GameConfig::PROP_LAMP_POST]  = { {PROP_DIR + "/LampPost.png"},  0.8f, true, false, 0.0f,  0.0f   };
 
@@ -153,7 +153,7 @@ void Map::InitPropRegistry() {
     // Tall grass (interactive)
     m_PropRegistry[GameConfig::PROP_TALLGRASS] = {
         { PROP_DIR + "/TallGrass2.png", PROP_DIR + "/TallGrass3.png", PROP_DIR + "/TallGrass4.png" },
-        0.5f, true, true, 0.0f, 0.0f
+        0.8001f, true, true, 0.0f, 0.0f
     };
 
     // Animated signs / decorations
@@ -167,14 +167,14 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_FLOWER] = {
         { PROP_DIR + "/Flower1.png", PROP_DIR + "/Flower2.png", PROP_DIR + "/Flower3.png",
           PROP_DIR + "/Flower4.png", PROP_DIR + "/Flower5.png" },
-        0.7f, true, true, 0.0f, 0.0f,
+        0.8f, true, true, 0.0f, 0.0f,
         PropAnimMode::LOOP, 45
     };
 
     m_PropRegistry[GameConfig::PROP_NTUT_SCREEN] = { 
         generateFrames(PROP_DIR + "NTUTScreen/NTUT_Screen-", 32), // Generates frames 1 through 32
-        0.7f, true, true, 0.0f, 0.0f,
-        PropAnimMode::LOOP, 10 // Added the animation mode and frame delay here!
+        0.8f, true, true, 0.0f, 0.0f,
+     PropAnimMode::LOOP, 10 // Added the animation mode and frame delay here!
         
     };
 

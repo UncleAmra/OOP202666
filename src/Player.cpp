@@ -5,7 +5,7 @@
 
 Player::Player(float x, float y) : Character(x, y) {
     // 1. Load our specific Red sprites
-    m_BaseZIndex = 0.5f;
+    m_BaseZIndex = 0.8f;
     LoadSprites();
     //m_FootOffsetY += 8.0f;
     m_Transform.translation.y -= 12.0f;

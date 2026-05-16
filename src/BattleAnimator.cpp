@@ -77,20 +77,20 @@ void BattleAnimator::PlayFaint(BattleSide side) {
 
 void BattleAnimator::PlayAttackEffect(const BattleAnimDef& def, 
                                       BattleSide target, 
+                                      glm::vec2 playerPos, 
+                                      glm::vec2 enemyPos, 
                                       std::function<void()> onFinished) 
 {
     if (!m_AnimPlayer) return;
 
-    glm::vec2 playerPos = { PLAYER_BASE_X, PLAYER_BASE_Y };
-    glm::vec2 enemyPos  = { ENEMY_BASE_X,  ENEMY_BASE_Y  };
-
+    // We now use the dynamic, body-centered positions passed from BattleUI
+    // instead of the hardcoded baseline constants.
     glm::vec2 userPos   = (target == BattleSide::ENEMY) ? playerPos : enemyPos;
     glm::vec2 targetPos = (target == BattleSide::ENEMY) ? enemyPos  : playerPos;
 
     m_IsPlayingEffect = true;
 
-    // We pass a lambda that cleans up local state AND notifies the UI.
-    // The AnimPlayer will store and call this once its frames run out.
+    // Pass the calculated positions to your underlying AnimPlayer
     m_AnimPlayer->Play(def, userPos, targetPos, [this, onFinished]() {
         LOG_INFO("[BattleAnimator] AnimPlayer signal received: Cleaning up.");
         this->m_IsPlayingEffect = false; 
@@ -99,7 +99,6 @@ void BattleAnimator::PlayAttackEffect(const BattleAnimDef& def,
         }
     });
 }
-
 void BattleAnimator::Update(float dt) {
     // 1. Tick the Move Animation Player (Cels/Sprites)
     if (m_AnimPlayer) {

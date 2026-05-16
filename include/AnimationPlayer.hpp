@@ -47,6 +47,8 @@ public:
     void Update(float deltaMs);
     bool IsPlaying() const { return m_Playing; }
     void Stop();
+    void SetAnimScale(float s) { m_AnimScale = s; }
+    float GetAnimScale() const { return m_AnimScale; }
 
 private:
     // ── Playback state ────────────────────────────────────────────────────
@@ -56,7 +58,7 @@ private:
     float                     m_FrameMs    = 50.f;  // ms per frame (1000/fps)
     bool                      m_Playing    = false;
     std::function<void()>     m_OnFinished;
-
+    float m_AnimScale = 0.35f; 
     // ── Anchor positions ──────────────────────────────────────────────────
     glm::vec2                 m_UserPos    = {0.f, 0.f};
     glm::vec2                 m_TargetPos  = {0.f, 0.f};
@@ -86,22 +88,45 @@ private:
     // PTSD uses +Y = up (standard OpenGL). We flip Y here.
     // AnimationPlayer.hpp — RpgToScreen must account for RPG Maker origin:
     // In AnimationPlayer.hpp or .cpp
-    glm::vec2 RpgToScreen(float rpgX, float rpgY, glm::vec2 anchor) const {
-    // This multiplier maps the 640x480 coordinate space to your 1280x720 space
-    const float RES_SCALE = 2.0f; 
+   glm::vec2 RpgToScreen(float rpgX, float rpgY, glm::vec2 anchor) const {
+        // Base aspect ratio scales to map 640x480 space to 1280x720 space
+        const float scaleX = (1280.f / 640.f) * m_AnimScale;
+        const float scaleY = ( 720.f / 480.f) * m_AnimScale;
 
-    // 1. Find the offset from the RPG Maker center (320, 240)
-    float deltaX = rpgX - 320.0f;
-    float deltaY = rpgY - 240.0f;
+        // ====================================================================
+        // 1. POSITION "BOTH" (e.g., Water Gun traveling between sprites)
+        // ====================================================================
+        if (m_Def->position == AnimPosition::BOTH) {
+            // RPG Maker traditional layouts place the Player at X=160, Y=220 
+            // and the Enemy at X=384, Y=100 on a 640x480 canvas.
+            // We find out who is on the left and right in your engine to map them correctly.
+            glm::vec2 screenLeft  = (m_UserPos.x < m_TargetPos.x) ? m_UserPos : m_TargetPos;
+            glm::vec2 screenRight = (m_UserPos.x < m_TargetPos.x) ? m_TargetPos : m_UserPos;
 
-    // 2. Scale that offset so the "movement" covers the correct distance
-    float scaledX = deltaX * RES_SCALE;
-    float scaledY = deltaY * RES_SCALE;
+            // Map X coordinate perfectly between your two sprites
+            float ratioX = (rpgX - 160.f) / (384.f - 160.f); 
+            float finalX = screenLeft.x + ratioX * (screenRight.x - screenLeft.x);
 
-    // 3. Apply the flipped Y for OpenGL and add to your world anchor
-    // We use '-' for scaledY because in RPG Maker, +Y is DOWN.
-    return { anchor.x + scaledX, anchor.y - scaledY };
-}
+            // Map Y coordinate perfectly between your two sprites 
+            // (RPG Maker Y=220 is lower screen, Y=100 is upper screen)
+            float ratioY = (rpgY - 220.f) / (100.f - 220.f);
+            float finalY = screenLeft.y + ratioY * (screenRight.y - screenLeft.y);
+
+            return { finalX, finalY - 100 };
+        }
+
+        // ====================================================================
+        // 2. STANDARD POSITIONING (Target / User / Screen, e.g., Thundershock)
+        // ====================================================================
+        float deltaX = (rpgX - 320.f) * scaleX;
+        
+        // Since your anchor is already lifted by +112px to find the body center,
+        // we multiply the RPG offset calculation by 0.4f to damp the extra climb 
+        // and keep the lightning bolts centered on the target.
+        float deltaY = -(rpgY - 240.f) * scaleY * 0.4f; 
+
+        return { anchor.x + deltaX -50, anchor.y + deltaY -50 };
+    }
     // Given a pattern index and sheet, compute the source rect (top-left corner
     // in the PNG) as a normalised UV or just the pixel offset.
     // Pattern layout: row-major, SHEET_COLS=5 columns, each cell 192x192.

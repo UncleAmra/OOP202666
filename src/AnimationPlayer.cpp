@@ -111,7 +111,8 @@ glm::vec2 AnimationPlayer::ResolveAnchor() const {
     switch (m_Def->position) {
         case AnimPosition::SCREEN: anchor = {0.f, 0.f}; break;
         case AnimPosition::USER:   anchor = m_UserPos; break;
-        case AnimPosition::BOTH:   anchor = (m_UserPos + m_TargetPos) * 0.5f; break;
+        case AnimPosition::BOTH:   anchor = {0.f, 0.f}; break;
+        //case AnimPosition::BOTH:   anchor = (m_UserPos + m_TargetPos) * 0.5f; break;
         case AnimPosition::TARGET: anchor = m_TargetPos; break;
         default:                   anchor = m_TargetPos;
     }
@@ -129,17 +130,17 @@ void AnimationPlayer::ApplyFrame(int frameIndex) {
     const AnimFrame& frame = m_Def->frames[frameIndex];
     glm::vec2 anchor = ResolveAnchor();
 
-    // Hide cels that this frame does not use
     for (int i = (int)frame.size(); i < MAX_CELS; ++i)
         m_CelObjects[i]->SetVisible(false);
+
+    std::string sheetPath = std::string(RESOURCE_DIR) + "/Battle_anim/" + m_Def->graphic;
 
     for (int ci = 0; ci < (int)frame.size() && ci < MAX_CELS; ++ci) {
         const AnimCel& cel = frame[ci];
         auto& obj = m_CelObjects[ci];
         auto& img = m_CelImages[ci];
 
-        // Ensure image is loaded from the current m_Def->graphic
-        std::string sheetPath = std::string(RESOURCE_DIR) + "/Battle_anim/" + m_Def->graphic;
+        // ── Image ─────────────────────────────────────────────────────
         if (!img) {
             img = std::make_shared<Util::Image>(sheetPath);
             obj->SetDrawable(img);
@@ -147,25 +148,31 @@ void AnimationPlayer::ApplyFrame(int frameIndex) {
             img->SetImage(sheetPath);
         }
 
-        // --- Calculate screen position ---
-        glm::vec2 screenPos = RpgToScreen(cel.x, cel.y, anchor);
-        obj->m_Transform.translation = screenPos;
+        // ── Position ──────────────────────────────────────────────────
+        obj->m_Transform.translation = RpgToScreen(cel.x, cel.y, anchor);
 
-        // --- Scale and mirror (1x scale version) ---
-        float sx = (cel.zoom_x / 100.f) * (cel.mirror ? -1.f : 1.f);
-        float sy = cel.zoom_y / 100.f;
-        obj->m_Transform.scale = {sx, sy};
-        obj->m_Transform.rotation = cel.rotation;
+        // ── Scale ─────────────────────────────────────────────────────
+        // zoom_y=0 in RPG Maker means "same as zoom_x", not actually zero
+        float zx = (cel.zoom_x > 0 ? cel.zoom_x : 100.f) / 100.f;
+        float zy = (cel.zoom_y > 0 ? cel.zoom_y : zx * 100.f) / 100.f;
 
-        // --- Pattern logic ---
+        // m_AnimScale shrinks from raw 192px to a reasonable battle size
+        // Tune this value — start at 0.5f, adjust until it looks right
+        float sx = zx * m_AnimScale * (cel.mirror ? -1.f : 1.f);
+        float sy = zy * m_AnimScale;
+        obj->m_Transform.scale    = {sx, sy};
+        obj->m_Transform.rotation =  cel.rotation;
+
+        // ── Spritesheet slice ─────────────────────────────────────────
         int col = cel.pattern % BattleAnimDef::SHEET_COLS;
         int row = cel.pattern / BattleAnimDef::SHEET_COLS;
-        img->SetSrcRect(col * BattleAnimDef::CEL_W, row * BattleAnimDef::CEL_H, 
-                        BattleAnimDef::CEL_W, BattleAnimDef::CEL_H);
+        img->SetSrcRect(col * BattleAnimDef::CEL_W, row * BattleAnimDef::CEL_H,
+                        BattleAnimDef::CEL_W,        BattleAnimDef::CEL_H);
 
-        // --- Visibility ---
+        // ── Visibility ────────────────────────────────────────────────
         obj->SetVisible(cel.opacity > 0);
     }
+
     m_ActiveCels = (int)frame.size();
 }
 

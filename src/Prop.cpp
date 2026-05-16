@@ -62,28 +62,28 @@ void Prop::Update() {
     // --- 1. DYNAMIC Z-SORTING ---
     // In Prop::Update(), account for sprite height when computing footY:
     if (m_UseDynamicZ) {
-    float footY = m_Transform.translation.y;
+        float footY = m_Transform.translation.y;
 
-    // Y-based sort within the layer — scaled small enough to never 
-    // cross into an adjacent layer (layers spaced ~0.1f apart)
-    float yOffset = footY / 10000.0f;
+        // Y-based sort within the layer — scaled small enough to never 
+        // cross into an adjacent layer (layers spaced ~0.1f apart)
+        float yOffset = footY / 10000.0f;
 
-    // Cantor pairing — unique key per grid cell, scaled tiny enough
-    // to only resolve same-row same-Y conflicts, never override layer or Y order
-    // Height contribution — taller sprites get higher Z since they extend
-// further down from their centre anchor, scaled tiny so it only affects
-// same-position same-baseZ conflicts
-    float spriteHeight = m_Drawable ? (m_Drawable->GetSize().y * GameConfig::SCALE) : 0.0f;
-    float heightWeight = spriteHeight * 0.00001f;
+        // Cantor pairing — unique key per grid cell, scaled tiny enough
+        // to only resolve same-row same-Y conflicts, never override layer or Y order
+        // Height contribution — taller sprites get higher Z since they extend
+    // further down from their centre anchor, scaled tiny so it only affects
+    // same-position same-baseZ conflicts
+        float spriteHeight = m_Drawable ? (m_Drawable->GetSize().y * GameConfig::SCALE) : 0.0f;
+        float heightWeight = spriteHeight * 0.00002f;
 
-    int cantorKey = (m_GridX >= 0 && m_GridY >= 0)
-                ? ((m_GridX + m_GridY) * (m_GridX + m_GridY + 1) / 2 + m_GridY)
-                : (int)(m_Transform.translation.x + m_Transform.translation.y * 1000);
-    float tiebreak = cantorKey * 0.000001f + heightWeight;
+        int cantorKey = (m_GridX >= 0 && m_GridY >= 0)
+                    ? ((m_GridX + m_GridY) * (m_GridX + m_GridY + 1) / 2 + m_GridY)
+                    : (int)(m_Transform.translation.x + m_Transform.translation.y * 1000);
+        float tiebreak = cantorKey * 0.000001f + heightWeight;
 
-    // Priority: m_BaseZIndex (layer) > yOffset (row) > tiebreak (cell)
-    SetZIndex(m_BaseZIndex - yOffset + tiebreak);
-}
+        // Priority: m_BaseZIndex (layer) > yOffset (row) > tiebreak (cell)
+        SetZIndex(m_BaseZIndex - yOffset + tiebreak);
+    }
 
     // --- 2. PLAYER-TRIGGERED ANIMATION (existing tall grass logic) ---
     if (m_AnimMode == PropAnimMode::STATIC && m_CurrentState != m_TargetState) {

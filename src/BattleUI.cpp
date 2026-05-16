@@ -711,24 +711,49 @@ if (m_DialogueQueue.empty()) {
     
     // --- ANIMATION TAGS ---
     if (nextLine.find("[ANIM:") != std::string::npos) {
-        m_DialogueQueue.pop();
-        size_t first = nextLine.find(':'), last = nextLine.rfind(':'), end = nextLine.find(']');
-        if (first != std::string::npos && last != first) {
-            std::string animName = nextLine.substr(first + 1, last - first - 1);
-            std::string targetStr = nextLine.substr(last + 1, end - last - 1);
-            const BattleAnimDef* animDef = AnimationLibrary::Get().Find(animName);
-            if (animDef) {
-                m_IsMoveAnimating = true;
-                BattleSide side = (targetStr == "TARGET_ENEMY") ? BattleSide::ENEMY : BattleSide::PLAYER;
-                m_Animator->PlayAttackEffect(*animDef, side, [this](){ 
-                    m_IsMoveAnimating = false;
-                    m_TextWaitTimer = 0;          // skip any remaining delay
-                    ProcessNextMessage();  
-                });
-            }
+    m_DialogueQueue.pop();
+    size_t first = nextLine.find(':'), last = nextLine.rfind(':'), end = nextLine.find(']');
+    if (first != std::string::npos && last != first) {
+        std::string animName = nextLine.substr(first + 1, last - first - 1);
+        std::string targetStr = nextLine.substr(last + 1, end - last - 1);
+        const BattleAnimDef* animDef = AnimationLibrary::Get().Find(animName);
+        
+        if (animDef) {
+            m_IsMoveAnimating = true;
+            BattleSide side = (targetStr == "TARGET_ENEMY") ? BattleSide::ENEMY : BattleSide::PLAYER;
+
+            // ====================================================================
+            // LAYOUT & ANCHOR COMPENSATION
+            // ====================================================================
+            // Sprite transform origins are at the base — offset upward to body center
+            static constexpr float SPRITE_SCALE    = 3.5f;
+            static constexpr float SPRITE_HEIGHT   = 64.f;  // typical Pokemon sprite height in pixels
+            static constexpr float BODY_CENTER_OFF = (SPRITE_HEIGHT * SPRITE_SCALE) * 0.5f; // ~112px
+
+            glm::vec2 playerPos = {
+                m_PlayerSprite->m_Transform.translation.x,
+                m_PlayerSprite->m_Transform.translation.y + BODY_CENTER_OFF
+            };
+            glm::vec2 enemyPos = {
+                m_EnemySprite->m_Transform.translation.x,
+                m_EnemySprite->m_Transform.translation.y + BODY_CENTER_OFF
+            };
+
+            // Quick visual calibration check for tracking position: both
+            LOG_INFO("Sprite midpoint: ({}, {})", 
+                     (playerPos.x + enemyPos.x) * 0.5f, 
+                     (playerPos.y + enemyPos.y) * 0.5f);
+
+            // Pass the calculated body-center positions to PlayAttackEffect
+            m_Animator->PlayAttackEffect(*animDef, side, playerPos, enemyPos, [this](){ 
+                m_IsMoveAnimating = false;
+                m_TextWaitTimer = 0;          // skip any remaining delay
+                ProcessNextMessage();  
+            });
         }
-        return true;
     }
+    return true;
+}
 
     // --- HP SYNC TAGS ---
     else if (nextLine.find("[SYNC_") != std::string::npos) {

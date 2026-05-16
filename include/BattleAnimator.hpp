@@ -56,8 +56,10 @@ public:
 
     // 3. Attack Effects
     void PlayAttackEffect(const BattleAnimDef& def, 
-                          BattleSide target, 
-                          std::function<void()> onFinished = nullptr);
+                      BattleSide target, 
+                      glm::vec2 playerPos, 
+                      glm::vec2 enemyPos, 
+                      std::function<void()> onFinished);
 
     // --- GATEKEEPERS & GETTERS ---
     // Returns true if ANY animation is currently happening (UI should pause text)

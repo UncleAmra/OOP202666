@@ -7,7 +7,7 @@
 
 namespace GameConfig {
     constexpr float TILE_SIZE   = 16.0f;
-    constexpr float SCALE       = 3.0f;
+    constexpr float SCALE       = 4.0f;
     constexpr float SCALED_TILE_SIZE    = TILE_SIZE * SCALE; // 48.0f
     constexpr float EFFECTIVE_TILE_SIZE = SCALED_TILE_SIZE - 0.1f; 
 

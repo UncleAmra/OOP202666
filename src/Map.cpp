@@ -153,7 +153,7 @@ void Map::InitPropRegistry() {
     // Tall grass (interactive)
     m_PropRegistry[GameConfig::PROP_TALLGRASS] = {
         { PROP_DIR + "/TallGrass2.png", PROP_DIR + "/TallGrass3.png", PROP_DIR + "/TallGrass4.png" },
-        0.801f, true, true, 0.0f, 0.0f
+        0.804f, true, true, 0.0f, 0.0f
     };
 
     // Animated signs / decorations
@@ -578,7 +578,14 @@ void Map::ClearMap() {
 }
 
 void Map::SetVisible(bool visible) {
-    for (auto& tile : m_Tiles) if (tile) tile->SetVisible(visible);
+
+    for (size_t i = 0; i < m_Tiles.size(); ++i) {
+        if (m_Tiles[i]) {
+            m_Tiles[i]->SetVisible(visible);
+            m_TileVisible[i] = visible;   // ← SYNC THE CACHE
+        }
+    }
+    //for (auto& tile : m_Tiles) if (tile) tile->SetVisible(visible);
     for (auto& prop : m_Props) if (prop) prop->SetVisible(visible);
     for (auto& npc  : m_NPCs)  if (npc)  npc->SetVisible(visible);
     for (auto& item : m_Items) if (item) item->SetVisible(visible);

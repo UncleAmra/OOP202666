@@ -49,6 +49,14 @@ void Map::InitTileRegistry() {
     m_TileRegistry[GameConfig::TILE_CALM_WATER]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/CalmWater.png"),     0.1f, 0.0f, false };
     m_TileRegistry[GameConfig::TILE_RED_BRICK]    =  { ResourceManager::GetImageStore().Get(TILE_DIR + "/RedBrick.png"),     0.1f, 0.0f, true };
     m_TileRegistry[GameConfig::TILE_GREY_BRICK]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/GreyBrick.png"),     0.1f, 0.0f, true };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE1]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone1.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE2]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone2.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE3]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone3.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE4]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone4.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE5]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone5.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE6]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone6.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE7]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone7.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_WALLSTONE8]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone8.png"),     0.1f, 0.0f, false };
 
 }
 

@@ -88,6 +88,8 @@ namespace GameConfig {
     constexpr int PROP_LOG_up1          = 80;
     constexpr int PROP_LOG_up2          = 81;
     constexpr int STAIRS_LEFT1          = 82;
+    constexpr int WOODEN_TABLE          = 83;
+
 
     constexpr int PROP_NTUT_BUILDING1       = 550;
     constexpr int PROP_NTUT_MOSS_BUILDING   = 551;

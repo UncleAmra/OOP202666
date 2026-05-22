@@ -107,8 +107,9 @@ namespace GameConfig {
     constexpr int PROP_NTUT_BUILDING7       = 562;
     constexpr int PROP_NTUT_BUILDING8       = 563;
     constexpr int PROP_NTUT_BUILDING9       = 564;
-
-
+    constexpr int MOSS_GENWORLDBUILDING     = 565;
+    constexpr int GEN_BUILDING1             = 566;
+    constexpr int GEN_BUILDING2             = 567;
 
     //
 

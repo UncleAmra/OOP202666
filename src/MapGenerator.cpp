@@ -173,25 +173,29 @@ void MapGenerator::FillCityBlocks(Grid& ground, Grid& props, int w, int h,
 
             switch (type) {
                 case BlockType::COMMERCIAL:
-                case BlockType::RESIDENTIAL: {
-                    if (!stamps.random.empty()) {
-                        const Stamp& chosen = PickWeightedStamp(stamps.random, rng);
-                        
-                        // Center the building in the block
-                        int anchorX = x + (blockW - chosen.width) / 2;
-                        int anchorY = y + (blockH - chosen.height) / 2;
-                        
-                        // Ensure we don't bleed onto the road
-                        int maxX = std::max(x, x + blockW - chosen.width);
-                        int maxY = std::max(y, y + blockH - chosen.height);
-                        anchorX = std::clamp(anchorX, x, maxX);
-                        anchorY = std::clamp(anchorY, y, maxY);
+case BlockType::RESIDENTIAL: {
+    if (!stamps.random.empty()) {
+        const Stamp& chosen = PickWeightedStamp(stamps.random, rng);
 
-                        int dummyX = 0, dummyY = 0;
-                        ApplyStamp(ground, props, chosen, anchorX, anchorY, dummyX, dummyY);
-                    }
-                    break;
-                }
+        // Skip if stamp doesn't fit in this block
+        if (chosen.width > blockW || chosen.height > blockH) break;
+
+        int anchorX = x + (blockW - chosen.width) / 2;
+        int anchorY = y + (blockH - chosen.height) / 2;
+
+        // Clamp so the stamp's bottom row never touches the road below the block
+        int maxY = y + blockH - chosen.height - 1; // <-- the -1 is the margin
+        if (maxY < y) break; // stamp too tall even with margin, skip it
+        anchorY = std::clamp(anchorY, y, maxY);
+
+        int maxX = x + blockW - chosen.width;
+        anchorX = std::clamp(anchorX, x, maxX);
+
+        int dummyX = 0, dummyY = 0;
+        ApplyStamp(ground, props, chosen, anchorX, anchorY, dummyX, dummyY);
+    }
+    break;
+}
                 case BlockType::PARK: {
                     // Place one tree in the center
                     int centerX = x + blockW / 2;
@@ -241,7 +245,7 @@ void MapGenerator::PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, i
             if (roadDown) continue;
 
             // 2. Deterministic placement every 5 tiles (increased from 3 to reduce density)
-            if (((roadUp) && (x % 5 == 0)) || 
+            if (((roadUp) && (x % 8 == 0)) || 
                 ((roadLeft || roadRight) && (y % 5 == 0))) {
                 props[y][x] = GameConfig::PROP_LAMP_POST;
             }

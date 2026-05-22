@@ -64,14 +64,14 @@ glm::vec2 Character::Update(std::shared_ptr<Map> map) {
     if (m_UseDynamicZ) {
         float footY = m_Transform.translation.y - (GameConfig::SCALED_TILE_SIZE * 0.5f);
 
-        float yOffset = footY / 10000.0f;
+        float yOffset = footY / 1000.0f;
 
         // Cantor pairing — same formula as Prop so characters sort
         // consistently within the same Z space as props
         int cantorKey = (m_GridX >= 0 && m_GridY >= 0)
                     ? ((m_GridX + m_GridY) * (m_GridX + m_GridY + 1) / 2 + m_GridY)
                     : (int)(m_Transform.translation.x + m_Transform.translation.y * 1000);
-        float tiebreak = cantorKey * 0.000001f;
+        float tiebreak = cantorKey * 0.0001f;
 
         // Priority: m_BaseZIndex (layer) > yOffset (row) > tiebreak (cell)
         SetZIndex(m_BaseZIndex - yOffset + tiebreak);

@@ -104,8 +104,9 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING2]      = { {PROP_DIR + "/TechBuilding12.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::PROP_NTUT_CAFETERIA_BUILDING]      = { {PROP_DIR + "/CafeteriaBuilding.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING]      = { {PROP_DIR + "/TechBuilding.png"},          0.8f, true,  false, 0.0f,  -144.0f};
-
-
+    m_PropRegistry[GameConfig::MOSS_GENWORLDBUILDING]      = { {PROP_DIR + "/NTUT_Building1Moss.png"},          0.8f, true,  false, 0.0f,  -144.0f};
+    m_PropRegistry[GameConfig::GEN_BUILDING1]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  -144.0f};
+    m_PropRegistry[GameConfig::GEN_BUILDING2]      = { {PROP_DIR + "/NTUT_Building1.png"},          0.8f, true,  false, 0.0f,  -144.0f};
 
     // Checkpoints / gates
     m_PropRegistry[GameConfig::PROP_CHECKPOINT]    = { {PROP_DIR + "/Checkpoint2.png"}, 0.8f, true,  false, 0.0f, 96.0f };
@@ -138,12 +139,12 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_PC_WALL_RIGHT] = { {PROP_DIR + "/PCWall3.png"},      0.3f, false, false, 0.0f,  0.0f   };
 
     // Nature props
-    m_PropRegistry[GameConfig::PROP_TREE]        = { {PROP_DIR + "/Tree.png"},      0.8f, true, true,  20.0f, -16.0f };
-    m_PropRegistry[GameConfig::PROP_PALM_TREE]   = { {PROP_DIR + "/PalmTree.png"},  0.8f, true, true,  20.0f, -16.0f };
-    m_PropRegistry[GameConfig::PROP_SMALL_TREE]  = { {PROP_DIR + "/SmallTree.png"}, 0.8f, true, false, 0.0f,  0.0f   };
-    m_PropRegistry[GameConfig::PROP_TALL_TREE]   = { {PROP_DIR + "/TallTree.png"},  0.8f, true, true,  0.0f,  0.0f   };
+    m_PropRegistry[GameConfig::PROP_TREE]        = { {PROP_DIR + "/Tree.png"},      0.801f, true, true,  20.0f, -16.0f };
+    m_PropRegistry[GameConfig::PROP_PALM_TREE]   = { {PROP_DIR + "/PalmTree.png"},  0.802f, true, true,  20.0f, -16.0f };
+    m_PropRegistry[GameConfig::PROP_SMALL_TREE]  = { {PROP_DIR + "/SmallTree.png"}, 0.803f, true, false, 0.0f,  0.0f   };
+    m_PropRegistry[GameConfig::PROP_TALL_TREE]   = { {PROP_DIR + "/TallTree.png"},  0.804f, true, true,  0.0f,  0.0f   };
 
-    m_PropRegistry[GameConfig::PROP_LAMP_POST]  = { {PROP_DIR + "/LampPost.png"},  0.8f, true, false, 0.0f,  0.0f   };
+    m_PropRegistry[GameConfig::PROP_LAMP_POST]  = { {PROP_DIR + "/LampPost.png"},  0.81f, true, false, 0.0f,  0.0f   };
 
 
     // Log obstacles

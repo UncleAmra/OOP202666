@@ -66,7 +66,7 @@ void Prop::Update() {
 
         // Y-based sort within the layer — scaled small enough to never 
         // cross into an adjacent layer (layers spaced ~0.1f apart)
-        float yOffset = footY / 10000.0f;
+        float yOffset = footY / 1000.0f;
 
         // Cantor pairing — unique key per grid cell, scaled tiny enough
         // to only resolve same-row same-Y conflicts, never override layer or Y order
@@ -79,7 +79,7 @@ void Prop::Update() {
         int cantorKey = (m_GridX >= 0 && m_GridY >= 0)
                     ? ((m_GridX + m_GridY) * (m_GridX + m_GridY + 1) / 2 + m_GridY)
                     : (int)(m_Transform.translation.x + m_Transform.translation.y * 1000);
-        float tiebreak = cantorKey * 0.000001f + heightWeight;
+        float tiebreak = cantorKey * 0.0001f + heightWeight;
 
         // Priority: m_BaseZIndex (layer) > yOffset (row) > tiebreak (cell)
         SetZIndex(m_BaseZIndex - yOffset + tiebreak);

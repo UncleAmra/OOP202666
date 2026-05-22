@@ -75,8 +75,8 @@ private:
     static void EraseRandomRoads(Grid& ground, int w, int h, int roadTile, int floorTile, 
                                  int spacingX, int spacingY, RNG& rng);
     static void FillCityBlocks(Grid& ground, Grid& props, int w, int h, 
-                               int roadTile, int floorTile, RNG& rng);
-    static void PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, int roadTile, RNG& rng);
+                               int roadTile, int floorTile, const StampCollection& stamps, RNG& rng);
+    static void PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, int roadTile);
     static void ApplyDistrictDensity(Grid& props, int w, int h, RNG& rng);
     static bool IsAdjacentToRoad(const Grid& ground, int x, int y, int roadTile, int w, int h);
 

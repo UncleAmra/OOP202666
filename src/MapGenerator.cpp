@@ -56,10 +56,7 @@ GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
         GenerateRoadGrid(result.ground, width, height, 
                          stamps.roadTile, stamps.blockSpacingX, stamps.blockSpacingY);
         
-        // Erase random segments to create T-intersections and varied blocks
-        EraseRandomRoads(result.ground, width, height, 
-                         stamps.roadTile, stamps.floorTile, 
-                         stamps.blockSpacingX, stamps.blockSpacingY, rng);
+        // Roads must be connected — skipping EraseRandomRoads to keep full grid
                          
         result.spawnX = width / 2;
         result.spawnY = height / 2;
@@ -75,40 +72,7 @@ GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
                    result.spawnX, result.spawnY);
     }
 
-    if (!stamps.random.empty()) {
-        std::uniform_int_distribution<int> stampCount(2, 4);
-        std::uniform_int_distribution<int> rx(8, width  - 8);
-        std::uniform_int_distribution<int> ry(8, height - 8);
-
-        int count = stampCount(rng);
-        for (int i = 0; i < count; i++) {
-            const Stamp& chosen = PickWeightedStamp(stamps.random, rng);
-            for (int attempt = 0; attempt < 20; attempt++) {
-                int px = rx(rng);
-                int py = ry(rng);
-
-                if (px + chosen.width  >= width  - 1) continue;
-                if (py + chosen.height >= height - 1) continue;
-
-                // Validate location
-                bool valid = true;
-                for (int sy = 0; sy < chosen.height && valid; sy++) {
-                    for (int sx = 0; sx < chosen.width && valid; sx++) {
-                        // For cities, allow stamping over roads. For caves, only on floor.
-                        if (stamps.biome == "cave" && result.ground[py + sy][px + sx] != stamps.floorTile) {
-                            valid = false;
-                        }
-                    }
-                }
-
-                if (valid) {
-                    int dummyX = result.spawnX, dummyY = result.spawnY;
-                    ApplyStamp(result.ground, result.props, chosen, px, py, dummyX, dummyY);
-                    break;
-                }
-            }
-        }
-    }
+    // Random stamps are now handled within FillCityBlocks to ensure they are centered in blocks
 
     // =========================================================================
     // PHASE 3: POPULATION (Fills empty areas around stamps)
@@ -120,8 +84,8 @@ GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
         PlaceGuardNPCs(result.ground, result.props, width, height, stamps.floorTile, stamps.wallTile);
     } else {
         FillCityBlocks(result.ground, result.props, width, height, 
-                       stamps.roadTile, stamps.floorTile, rng);
-        PlaceSidewalkProps(result.ground, result.props, width, height, stamps.roadTile, rng);
+                       stamps.roadTile, stamps.floorTile, stamps, rng);
+        PlaceSidewalkProps(result.ground, result.props, width, height, stamps.roadTile);
         ApplyDistrictDensity(result.props, width, height, rng);
     }
 
@@ -188,9 +152,9 @@ void MapGenerator::EraseRandomRoads(Grid& ground, int w, int h, int roadTile, in
 }
 
 void MapGenerator::FillCityBlocks(Grid& ground, Grid& props, int w, int h, 
-                                   int roadTile, int floorTile, RNG& rng) {
+                                   int roadTile, int floorTile, const StampCollection& stamps, RNG& rng) {
     enum class BlockType { COMMERCIAL, RESIDENTIAL, PARK, EMPTY_LOT };
-    std::discrete_distribution<int> blockTypeDist({ 40, 35, 15, 10 });
+    std::discrete_distribution<int> blockTypeDist({ 35, 30, 25, 10 });
 
     for (int y = 1; y < h - 1; y++) {
         for (int x = 1; x < w - 1; x++) {
@@ -202,64 +166,66 @@ void MapGenerator::FillCityBlocks(Grid& ground, Grid& props, int w, int h,
 
             BlockType type = static_cast<BlockType>(blockTypeDist(rng));
 
-            // Measure bounds (dynamic because EraseRandomRoads may have merged blocks)
+            // Measure block bounds
             int blockW = 0, blockH = 0;
             for (int bx = x; bx < w && ground[y][bx] != roadTile; bx++) blockW++;
             for (int by = y; by < h && ground[by][x] != roadTile; by++) blockH++;
 
-            for (int by = y; by < y + blockH && by < h; by++) {
-                for (int bx = x; bx < x + blockW && bx < w; bx++) {
-                    if (props[by][bx] != 0) continue; // Respect pre-placed stamps
+            switch (type) {
+                case BlockType::COMMERCIAL:
+                case BlockType::RESIDENTIAL: {
+                    if (!stamps.random.empty()) {
+                        const Stamp& chosen = PickWeightedStamp(stamps.random, rng);
+                        
+                        // Center the building in the block
+                        int anchorX = x + (blockW - chosen.width) / 2;
+                        int anchorY = y + (blockH - chosen.height) / 2;
+                        
+                        // Ensure we don't bleed onto the road
+                        int maxX = std::max(x, x + blockW - chosen.width);
+                        int maxY = std::max(y, y + blockH - chosen.height);
+                        anchorX = std::clamp(anchorX, x, maxX);
+                        anchorY = std::clamp(anchorY, y, maxY);
 
-                    switch (type) {
-                        case BlockType::COMMERCIAL: {
-                            bool isEdge = (bx == x || bx == x + blockW - 1 || 
-                                           by == y || by == y + blockH - 1);
-                            if (isEdge) {
-                                props[by][bx] = GameConfig::PROP_INVISIBLE_WALL;
+                        int dummyX = 0, dummyY = 0;
+                        ApplyStamp(ground, props, chosen, anchorX, anchorY, dummyX, dummyY);
+                    }
+                    break;
+                }
+                case BlockType::PARK: {
+                    // Place one tree in the center
+                    int centerX = x + blockW / 2;
+                    int centerY = y + blockH / 2;
+                    if (centerX < w && centerY < h) {
+                        props[centerY][centerX] = GameConfig::PROP_TREE;
+                    }
+
+                    // Fill some grass randomly, but NO flowers
+                    std::uniform_int_distribution<int> grassRoll(0, 99);
+                    for (int by = y; by < y + blockH && by < h; by++) {
+                        for (int bx = x; bx < x + blockW && bx < w; bx++) {
+                            if (props[by][bx] == 0 && grassRoll(rng) < 15) {
+                                props[by][bx] = GameConfig::PROP_TALLGRASS;
                             }
-                            break;
-                        }
-                        case BlockType::RESIDENTIAL: {
-                            int localX = bx - x, localY = by - y;
-                            if (localX % 3 == 0 && localY % 3 == 0 && 
-                                bx + 1 < x + blockW && by + 1 < y + blockH) {
-                                props[by][bx] = GameConfig::PROP_INVISIBLE_WALL;
-                            }
-                            break;
-                        }
-                        case BlockType::PARK: {
-                            std::uniform_int_distribution<int> parkRoll(0, 99);
-                            int r = parkRoll(rng);
-                            if (r < 12)      props[by][bx] = GameConfig::PROP_TREE;
-                            else if (r < 22) props[by][bx] = GameConfig::PROP_FLOWER;
-                            else if (r < 26) props[by][bx] = GameConfig::PROP_TALLGRASS;
-                            break;
-                        }
-                        case BlockType::EMPTY_LOT: {
-                            std::uniform_int_distribution<int> lotRoll(0, 99);
-                            if (lotRoll(rng) < 5) props[by][bx] = GameConfig::PROP_LAMP_POST;
-                            break;
                         }
                     }
+                    break;
                 }
-            }
-            
-            // Post-process Commercial blocks: add a door to the bottom center
-            if (type == BlockType::COMMERCIAL) {
-                int doorX = x + (blockW / 2);
-                int doorY = y + blockH - 1;
-                // Double check we haven't hit edge of map and it actually placed a wall there
-                if (doorY < h && doorX < w && props[doorY][doorX] == GameConfig::PROP_INVISIBLE_WALL) {
-                    props[doorY][doorX] = GameConfig::PROP_INVISIBLE_DOOR; 
+                case BlockType::EMPTY_LOT: {
+                    // Just a few lamp posts or empty
+                    std::uniform_int_distribution<int> lotRoll(0, 99);
+                    if (lotRoll(rng) < 10) {
+                        int lx = x + blockW / 2, ly = y + blockH / 2;
+                        if (lx < w && ly < h) props[ly][lx] = GameConfig::PROP_LAMP_POST;
+                    }
+                    break;
                 }
             }
         }
     }
 }
 
-void MapGenerator::PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, int roadTile, RNG& rng) {
-    std::uniform_int_distribution<int> roll(0, 99);
+void MapGenerator::PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, int roadTile) {
     for (int y = 1; y < h - 1; y++) {
         for (int x = 1; x < w - 1; x++) {
             if (ground[y][x] == roadTile) continue; 
@@ -271,12 +237,13 @@ void MapGenerator::PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, i
             bool roadLeft  = (ground[y][x-1] == roadTile);
             bool roadRight = (ground[y][x+1] == roadTile);
 
-            bool isCorner = (roadUp || roadDown) && (roadLeft || roadRight);
+            // 1. Prevent lamps on the bottom edge of a block (where they overlap road visuals)
+            if (roadDown) continue;
 
-            if (isCorner) {
+            // 2. Deterministic placement every 5 tiles (increased from 3 to reduce density)
+            if (((roadUp) && (x % 5 == 0)) || 
+                ((roadLeft || roadRight) && (y % 5 == 0))) {
                 props[y][x] = GameConfig::PROP_LAMP_POST;
-            } else if (roll(rng) < 12) {
-                props[y][x] = GameConfig::PROP_SMALL_TREE;
             }
         }
     }

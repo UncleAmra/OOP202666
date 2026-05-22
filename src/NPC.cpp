@@ -49,7 +49,9 @@ std::vector<std::string> NPC::Interact() {
     return m_DialogueLines;
 }
 
-void NPC::SetAction(NPCAction type, const std::string& data) {
-    m_ActionType = type;
-    m_ActionData = data;
+// In NPC.cpp
+void NPC::SetAction(NPCAction type, const std::string& data, ItemCategory itemCategory) {
+    m_ActionType     = type;
+    m_ActionData     = data;
+    m_ActionCategory = itemCategory;
 }

@@ -7,7 +7,7 @@
 
 namespace GameConfig {
     constexpr float TILE_SIZE   = 16.0f;
-    constexpr float SCALE       = 2.0f;
+    constexpr float SCALE       = 4.0f;
     constexpr float SCALED_TILE_SIZE    = TILE_SIZE * SCALE; // 48.0f
     constexpr float EFFECTIVE_TILE_SIZE = SCALED_TILE_SIZE - 0.1f; 
 
@@ -32,6 +32,7 @@ namespace GameConfig {
     constexpr int TILE_CALM_WATER   = 14;
     constexpr int TILE_RED_BRICK    = 15;
     constexpr int TILE_GREY_BRICK   = 16;
+    constexpr int TILE_CLASS_TILE   = 17;
     constexpr int TILE_WALLSTONE1    = 63;
     constexpr int TILE_WALLSTONE2    = 64;
     constexpr int TILE_WALLSTONE3    = 65;
@@ -125,6 +126,9 @@ namespace GameConfig {
     constexpr int NPC_NURSE     = 100;
     constexpr int NPC_TA1       = 101;
     constexpr int SHOP_KEEPER   = 102;
+    constexpr int NPC_STUDENT1 = 103;
+    constexpr int SHOP_KEEPER2   = 104;
+
 
 
     struct WarpDestination {

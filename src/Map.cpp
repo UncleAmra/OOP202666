@@ -57,6 +57,7 @@ void Map::InitTileRegistry() {
     m_TileRegistry[GameConfig::TILE_WALLSTONE6]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone6.png"),     0.1f, 0.0f, false };
     m_TileRegistry[GameConfig::TILE_WALLSTONE7]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone7.png"),     0.1f, 0.0f, false };
     m_TileRegistry[GameConfig::TILE_WALLSTONE8]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone8.png"),     0.1f, 0.0f, false };
+    m_TileRegistry[GameConfig::TILE_CLASS_TILE]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/ClassTile.png"),     0.1f, 0.0f, true };
 
 }
 
@@ -64,7 +65,10 @@ void Map::InitNPCRegistry() {
     // ID = { spritePath, visualOffsetY, zIndex, dynamicZ, dialoguePath, NPCAction, actionData }
     m_NPCRegistry[GameConfig::NPC_NURSE]   = NPCProperties{ NPC_DIR + "Nurse",      12.0f, 0.2f, false, DIALOGUE_DIR + "nurse.txt", NPCAction::HEAL,   ""            };
     m_NPCRegistry[GameConfig::NPC_TA1]     = NPCProperties{ NPC_DIR + "TA0",       -12.0f, 0.5f, true,  DIALOGUE_DIR + "ta.txt",    NPCAction::BATTLE, "Trainer_TA"  };
+    m_NPCRegistry[GameConfig::NPC_STUDENT1]     = NPCProperties{ NPC_DIR + "Student1",       -16.0f, 0.5f, true,  DIALOGUE_DIR + "student1.txt",    NPCAction::BATTLE, "Trainer_Student1"  };
     m_NPCRegistry[GameConfig::SHOP_KEEPER] = NPCProperties{ NPC_DIR + "ShopKeeper",-12.0f, 0.5f, true,  DIALOGUE_DIR + "ta.txt",    NPCAction::SHOP,   "Mart_Potions"};
+    m_NPCRegistry[GameConfig::SHOP_KEEPER2] = NPCProperties{ NPC_DIR + "ShopKeeper",-12.0f, 0.5f, true,  DIALOGUE_DIR + "shopkeeper.txt",    NPCAction::GIVE_ITEM,   "potion"};
+
 }
 
 void Map::InitPropRegistry() {
@@ -118,7 +122,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_GATE_END]      = { {PROP_DIR + "/GateBotEnd.png"},  0.8f, true,  false, 0.0f, 0.0f  };
     m_PropRegistry[GameConfig::PROP_GATE_TOP2]     = { {PROP_DIR + "/GateTopEnd2.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
     m_PropRegistry[GameConfig::PROP_GATE_END2]     = { {PROP_DIR + "/GateBotEnd2.png"}, 0.8f, true,  false, 0.0f, 0.0f  };
-    m_PropRegistry[GameConfig::PROP_STAIRS_NORTH]     = { {PROP_DIR + "/Stairs_North.png"}, 0.7f, false,  true, 0.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_STAIRS_NORTH]     = { {PROP_DIR + "/Stairs_North.png"}, 0.6f, false,  true, 0.0f, 0.0f  };
 
     //Decoration
     //m_PropRegistry[GameConfig::PROP_NTUT_SCREEN]     = { {PROP_DIR + "/NTUT_Screen.png"}, 0.7f, true,  true, 0.0f, 0.0f  };

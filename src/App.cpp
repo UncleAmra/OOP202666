@@ -191,7 +191,7 @@ void App::Update() {
 
                         if (action == NPCAction::SHOP) {
                             //LOG_INFO("TEST SUCCESS: Opening Shop with data: {}", data);
-                          
+                            
                             m_CurrentState = State::UPDATE; // Switch to State::SHOP later!
                             // m_ShopUI->Show(data);
                         }
@@ -225,6 +225,14 @@ void App::Update() {
                             );
                             m_CurrentState = State::BATTLE;
                             // Setup your battle here using the 'data' string
+                        }
+                        else if (action == NPCAction::GIVE_ITEM) {
+                            if (!data.empty()) {
+                                ItemCategory category = m_ActiveNPC->GetActionCategory();
+                                m_Character->AddItem(data, category, 1);
+                                LOG_INFO("Player received: {} (qty: 1)", data);
+                            }
+                            m_CurrentState = State::UPDATE;
                         }
                         else {
                             // NONE or GIVE_ITEM falls back to the overworld

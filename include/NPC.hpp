@@ -26,9 +26,11 @@ public:
     
     std::vector<std::string> Interact();
     // Add these new methods!
-    void SetAction(NPCAction type, const std::string& data = "");
+    void SetAction(NPCAction type, const std::string& data = "",
+                   ItemCategory itemCategory = ItemCategory::GENERAL);
     NPCAction GetActionType() const { return m_ActionType; }
     std::string GetActionData() const { return m_ActionData; }
+    ItemCategory GetActionCategory() const { return m_ActionCategory; } 
 
 protected:
     void LoadSprites() override;
@@ -42,6 +44,7 @@ private:
     std::vector<std::string> m_AltDialogueLines;    
     std::string m_FlagCondition;     
     NPCAction m_ActionType = NPCAction::NONE;
+    ItemCategory m_ActionCategory = ItemCategory::GENERAL;
     std::string m_ActionData = ""; // Stores item names, shop inventory IDs, or Trainer IDs               
 };
 

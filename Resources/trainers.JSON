@@ -6,6 +6,13 @@
         { "species": "Squirtle", "level": 7 },
         { "species": "Rattata", "level": 6 }
       ]
+    },
+        "Trainer_Student1": {
+      "name": "Student1",
+      "party": [
+        { "species": "Charizard", "level": 36 },
+        { "species": "Tododile", "level": 6 }
+      ]
     }
   }
 }

@@ -1,111 +1,143 @@
 #pragma once
-
-#include <vector>
 #include <string>
-#include <random>
+#include <vector>
 #include <fstream>
-#include <nlohmann/json.hpp> // Assuming you are using nlohmann/json
-#include "GameConfig.hpp"    // Assuming this contains your PROP_ and TILE_ constants
+#include <iostream>
+#include <random>
+#include "GameConfig.hpp"
 
-// If RESOURCE_DIR isn't defined globally in your build system, define a fallback
-#ifndef RESOURCE_DIR
-#define RESOURCE_DIR "res"
-#endif
-
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
+
 using Grid = std::vector<std::vector<int>>;
 using RNG  = std::mt19937;
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Data Structures
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Data types ────────────────────────────────────────────────────────────────
 
 struct GeneratedMap {
-    int seed = 0;
-    int floorTile = 0;
-    int wallTile = 0;
-    int spawnX = -1;
-    int spawnY = -1;
-    
+    int seed      = 0;
+    int spawnX    = 0;
+    int spawnY    = 0;
     Grid ground;
     Grid props;
+    int floorTile = GameConfig::TILE_DIRT;
+    int wallTile  = GameConfig::TILE_WATER_SOLID;
 };
 
 struct Stamp {
     std::string name;
-    int width = 0;
-    int height = 0;
-    int spawnX = -1;
-    int spawnY = -1;
+    int width   = 0;
+    int height  = 0;
+    int spawnX  = -1;
+    int spawnY  = -1;
     int anchorX = -1;
     int anchorY = -1;
-    int weight = 1;
-    
-    Grid ground;
-    Grid props;
+    int weight  = 1;
+    std::vector<std::vector<int>> ground;
+    std::vector<std::vector<int>> props;
 };
 
 struct StampCollection {
-    std::string biome;
-    int floorTile = 0;
-    int wallTile = 0;
-    
-    // City specific variables
-    int roadTile = 0;
-    int blockSpacingX = 8;
-    int blockSpacingY = 6;
-
     std::vector<Stamp> guaranteed;
     std::vector<Stamp> random;
+    std::string biome        = "cave";
+    int floorTile            = GameConfig::TILE_DIRT;
+    int wallTile             = GameConfig::TILE_WATER_SOLID; // cave only
+    int roadTile             = GameConfig::TILE_ROAD;        // city only
+    int blockSpacingX        = 8;                            // city only
+    int blockSpacingY        = 6;                            // city only
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  MapGenerator Class
-// ─────────────────────────────────────────────────────────────────────────────
+// ── MapGenerator ──────────────────────────────────────────────────────────────
 
 class MapGenerator {
 public:
-    // Top-level entry point (handles both Cave and City generation based on json biome)
     static GeneratedMap GenerateCave(int width, int height, int seed = -1);
 
 private:
-    // ── CITY GENERATION METHODS ──────────────────────────────────────────────
-    static void GenerateRoadGrid(Grid& ground, int w, int h, int roadTile, 
-                                 int blockSpacingX, int blockSpacingY);
-    static void EraseRandomRoads(Grid& ground, int w, int h, int roadTile, int floorTile, 
-                                 int spacingX, int spacingY, RNG& rng);
-    static void FillCityBlocks(Grid& ground, Grid& props, int w, int h, 
-                               int roadTile, int floorTile, const StampCollection& stamps, RNG& rng);
-    static void PlaceSidewalkProps(Grid& ground, Grid& props, int w, int h, int roadTile);
+    // ── City generation ──────────────────────────────────────────────────────
+
+    // Lays a grid of roads (roadWidth=2) across the map
+    static void GenerateRoadGrid(Grid& ground, int w, int h,
+                                  int roadTile, int blockSpacingX, int blockSpacingY);
+
+    // Randomly erases road segments between intersections (unused by default)
+    static void EraseRandomRoads(Grid& ground, int w, int h,
+                                  int roadTile, int floorTile,
+                                  int spacingX, int spacingY, RNG& rng);
+
+    // Fills each city block with a weighted random type (commercial/residential/park/empty)
+    static void FillCityBlocks(Grid& ground, Grid& props, int w, int h,
+                                int roadTile, int floorTile,
+                                const StampCollection& stamps, RNG& rng);
+
+    // Places lamp posts deterministically along road edges
+    static void PlaceSidewalkProps(Grid& ground, Grid& props,
+                                    int w, int h, int roadTile);
+
+    // Thins props toward the map edge to create a denser downtown feel
     static void ApplyDistrictDensity(Grid& props, int w, int h, RNG& rng);
-    static bool IsAdjacentToRoad(const Grid& ground, int x, int y, int roadTile, int w, int h);
 
-    // ── CAVE GENERATION METHODS ──────────────────────────────────────────────
-    static void CarvePath(Grid& grid, int startX, int startY, int endX, int endY, 
-                          int floorTile, RNG& rng);
-    static void CarveBranches(Grid& grid, int w, int h, int numBranches, int branchLength, 
-                              int floorTile, int wallTile, RNG& rng);
-    static void CarveCircle(Grid& grid, int cx, int cy, int radius, int floorTile);
-    static void GrowGrassPatches(const Grid& ground, Grid& props, int w, int h, 
-                                 int numSeeds, RNG& rng, int floorTile);
-    static void PlaceRewardsInNooks(const Grid& ground, Grid& props, int w, int h, int floorTile);
-    static void PlaceGuardNPCs(const Grid& ground, Grid& props, int w, int h, 
-                               int floorTile, int wallTile);
+    // Helper — true if any 4-directional neighbour is a road tile
+    static bool IsAdjacentToRoad(const Grid& ground, int x, int y,
+                                  int roadTile, int w, int h);
+
+    // ── Cave generation ──────────────────────────────────────────────────────
+
+    static void CarvePath(Grid& grid,
+                           int startX, int startY,
+                           int endX,   int endY,
+                           int floorTile, RNG& rng);
+
+    static void CarveBranches(Grid& grid, int w, int h,
+                               int numBranches, int branchLength,
+                               int floorTile, int wallTile, RNG& rng);
+
+    static void CarveCircle(Grid& grid, int cx, int cy,
+                             int radius, int floorTile);
+
+    static void GrowGrassPatches(const Grid& ground, Grid& props,
+                                  int w, int h, int numSeeds,
+                                  RNG& rng, int floorTile);
+
+    static void PlaceRewardsInNooks(const Grid& ground, Grid& props,
+                                     int w, int h, int floorTile);
+
+    static void PlaceGuardNPCs(const Grid& ground, Grid& props,
+                                int w, int h,
+                                int floorTile, int wallTile);
+
+    // ── Cellular automata / flood fill ───────────────────────────────────────
+
+    static void FillRandom(Grid& grid, int w, int h, float wallChance,
+                            RNG& rng, int floorTile, int wallTile);
+
     static void Smooth(Grid& grid, int passes, int floorTile, int wallTile);
+
     static int  CountWallNeighbours(const Grid& grid, int x, int y, int wallTile);
-    static void FloodFillKeepLargest(Grid& grid, int w, int h, int floorTile, int wallTile);
 
-    // ── SHARED / UTILITY METHODS ─────────────────────────────────────────────
-    static void FillRandom(Grid& grid, int w, int h, float wallChance, RNG& rng, 
-                           int floorTile, int wallTile);
-    static void PlaceProps(const Grid& ground, Grid& props, int w, int h, RNG& rng, int floorTile);
-    static void EnsureSpawnClear(Grid& ground, Grid& props, int spawnX, int spawnY, 
-                                 int radius, int floorTile);
-    static bool PlaceExit(Grid& props, const Grid& ground, int w, int h, int floorTile);
+    static void FloodFillKeepLargest(Grid& grid, int w, int h,
+                                      int floorTile, int wallTile);
 
-    // ── STAMP SYSTEM ─────────────────────────────────────────────────────────
-    static StampCollection LoadStamps(const std::string& filepath);
+    // ── Stamp system ─────────────────────────────────────────────────────────
+
+    static StampCollection LoadStamps       (const std::string& filepath);
     static const Stamp&    PickWeightedStamp(const std::vector<Stamp>& stamps, RNG& rng);
-    static void            ApplyStamp(Grid& ground, Grid& props, const Stamp& stamp, 
-                                      int anchorX, int anchorY, int& outSpawnX, int& outSpawnY);
+    static void            ApplyStamp       (Grid& ground, Grid& props,
+                                             const Stamp& stamp,
+                                             int anchorX, int anchorY,
+                                             int& outSpawnX, int& outSpawnY);
+
+    // ── Utility ──────────────────────────────────────────────────────────────
+
+    static void PlaceProps(const Grid& ground, Grid& props,
+                            int w, int h, RNG& rng, int floorTile);
+
+    static void EnsureSpawnClear(Grid& ground, Grid& props,
+                                  int spawnX, int spawnY,
+                                  int radius, int floorTile);
+
+    // Kept for cave biome fallback — city uses the guaranteed exit stamp instead
+    static bool PlaceExit(Grid& props, const Grid& ground,
+                           int w, int h, int floorTile);
 };

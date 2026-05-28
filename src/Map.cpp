@@ -166,7 +166,7 @@ void Map::InitTileRegistry() {
     m_TileRegistry[GameConfig::TILE_WALLSTONE8]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone8.png"),     0.1f, 0.0f, false };
     m_TileRegistry[GameConfig::TILE_CLASS_TILE]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/ClassTile.png"),     0.1f, 0.0f, true };
     m_TileRegistry[GameConfig::TILE_ELEVATOR_FLOOR]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/ElevatorTile.png"),     0.1f, 0.0f, true };
-
+    m_TileRegistry[GameConfig::TILE_DECK]          = { ResourceManager::GetImageStore().Get(TILE_DIR + "/deck.png"),     0.1f, 0.0f, true };
 
 }
 
@@ -192,7 +192,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_INTERACTABLE_WALL] = { {}, 0.0f, false, false, 0.0f,  0.0f };
 
     // Buildings
-    m_PropRegistry[GameConfig::PROP_POKECENTER]          = { {PROP_DIR + "/PokeCentre.png"},         0.8f, true,  false, 0.0f,  0.0f  };
+    m_PropRegistry[GameConfig::PROP_POKECENTER]          = { {PROP_DIR + "/PokeCentre.png"},         0.8f,  true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_POKEMONGYM]          = { {PROP_DIR + "/PokemonGym.png"},         0.8f, true,  false, 0.0f,  22.0f };
     m_PropRegistry[GameConfig::PROP_CHURCH]              = { {PROP_DIR + "/Church.png"},             0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::WOODEN_HOUSE]             = { {PROP_DIR + "/wood_house.png"},         0.8f, true,  false, 0.0f,  0.0f  };
@@ -201,8 +201,9 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_MOSS_BUILDING]  = { {PROP_DIR + "/ntut_build_1.png"},       0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING2]      = { {PROP_DIR + "/Building2.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING3]      = { {PROP_DIR + "/ntut_build_5.png"},       0.8f, true,  false, 0.0f,  0.0f  };
-    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 24.0f,  0.0f  };
-    m_PropRegistry[GameConfig::WOODEN_DECK]              = { {PROP_DIR + "/deck.png"},               0.1f, true,  false, 24.0f, 0.0f  };
+    m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 24.0f, 0.0f  };
+    m_PropRegistry[GameConfig::WOODEN_DECK]              = { {PROP_DIR + "/deck_1.png"},             0.1f, true,  false, 24.0f, 0.0f  };
+    m_PropRegistry[GameConfig::CITY_BUILD1]              = { {PROP_DIR + "/city_build.png"},         0.8f, true,  false, 0.0f,  0.0f  };
     //558
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, -16.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING6]      = { {PROP_DIR + "/Building6.png"},          0.8f, true,  false, 0.0f,  0.0f  };
@@ -213,7 +214,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_CAFETERIA_BUILDING]      = { {PROP_DIR + "/CafeteriaBuilding.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_TECH_BUILDING]      = { {PROP_DIR + "/TechBuilding.png"},          0.8f, true,  false, 0.0f,  -144.0f};
     m_PropRegistry[GameConfig::MOSS_GENWORLDBUILDING]      = { {PROP_DIR + "/NTUT_Building1Moss.png"},          0.8f, true,  false, 0.0f,  -144.0f};
-    m_PropRegistry[GameConfig::GEN_BUILDING1]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  -144.0f};
+    m_PropRegistry[GameConfig::GEN_BUILDING1]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, 0.0f,  0.0f};
     m_PropRegistry[GameConfig::GEN_BUILDING2]      = { {PROP_DIR + "/NTUT_Building1.png"},          0.8f, true,  false, 0.0f,  -144.0f};
 
     // Checkpoints / gates

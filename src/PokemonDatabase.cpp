@@ -25,12 +25,12 @@ std::shared_ptr<Pokemon> PokemonDatabase::CreatePokemon(
 
     const PokemonSpecies& species = GetSpecies(name);
 
-    int hp  = CalcHP(species.baseHP, level);
-    int atk = CalcStat(species.baseAttack, level);
-    int def = CalcStat(species.baseDefense, level);
-    int spa = CalcStat(species.baseSpAttack, level);
-    int spd = CalcStat(species.baseSpDefense, level);
-    int spe = CalcStat(species.baseSpeed, level);
+    int hp  = CalcHP  (species.baseHP,          level);
+    int atk = CalcStat(species.baseAttack,      level);
+    int def = CalcStat(species.baseDefense,     level);
+    int spa = CalcStat(species.baseSpAttack,    level);
+    int spd = CalcStat(species.baseSpDefense,   level);
+    int spe = CalcStat(species.baseSpeed,       level);
 
     auto pokemon = std::make_shared<Pokemon>(
         name, level,
@@ -43,7 +43,6 @@ std::shared_ptr<Pokemon> PokemonDatabase::CreatePokemon(
             pokemon->LearnMove(lm.moveName);
         }
     }
-
     return pokemon;
 }
 
@@ -609,7 +608,7 @@ void PokemonDatabase::Init() {
 
 const PokemonSpecies& PokemonDatabase::GetSpecies(const std::string& name) {
     auto it = s_Species.find(name);
-    if (it == s_Species.end()) {
+    if  (it == s_Species.end()) {
         LOG_ERROR("Species '{}' not found!", name);
         static PokemonSpecies empty{};
         return empty;

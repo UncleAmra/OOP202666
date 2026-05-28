@@ -1,4 +1,4 @@
-#include "MapGenerator.hpp"
+﻿#include "MapGenerator.hpp"
 #include <queue>
 #include <unordered_set>
 #include <random>
@@ -6,9 +6,9 @@
 #include <algorithm>
 #include <cmath>
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  GenerateCave — top-level entry point
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+//  GenerateCave вЂ” top-level entry point
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
     if (seed < 0) seed = (int)std::random_device{}();
@@ -23,8 +23,8 @@ GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
     result.floorTile = stamps.floorTile;
     result.wallTile  = stamps.wallTile;
 
-    // City starts as all floor — walls come only from 999 props in stamps
-    // Cave starts as all wall — floor is carved out
+    // City starts as all floor вЂ” walls come only from 999 props in stamps
+    // Cave starts as all wall вЂ” floor is carved out
     result.ground.assign(height, std::vector<int>(width, stamps.floorTile));
     result.props .assign(height, std::vector<int>(width, 0));
 
@@ -65,7 +65,7 @@ GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
 
     // =========================================================================
     // PHASE 2: GUARANTEED STAMPS (entrance + exit at fixed world coords)
-    // Exit is baked into city_exit stamp at (36,37) — no PlaceExit call needed.
+    // Exit is baked into city_exit stamp at (36,37) вЂ” no PlaceExit call needed.
     // connections.txt can hardcode that coordinate for every generated city map.
     // =========================================================================
 
@@ -110,9 +110,9 @@ GeneratedMap MapGenerator::GenerateCave(int width, int height, int seed) {
     return result;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 //  CITY GENERATION METHODS
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 void MapGenerator::GenerateRoadGrid(Grid& ground, int w, int h,
                                      int roadTile, int blockSpacingX, int blockSpacingY) {
@@ -162,7 +162,7 @@ void MapGenerator::EraseRandomRoads(Grid& ground, int w, int h, int roadTile, in
 void MapGenerator::FillCityBlocks(Grid& ground, Grid& props, int w, int h,
                                    int roadTile, int floorTile,
                                    const StampCollection& stamps, RNG& rng) {
-    // Every block always attempts a stamp placement — type only affects
+    // Every block always attempts a stamp placement вЂ” type only affects
     // what happens when no stamp fits (fallback behaviour)
     const int minBlockSize = 2;
 
@@ -236,7 +236,7 @@ void MapGenerator::PlaceSidewalkProps(Grid& ground, Grid& props,
             bool roadLeft  = (ground[y][x-1] == roadTile);
             bool roadRight = (ground[y][x+1] == roadTile);
 
-            // Never place on the bottom edge — overlaps road visuals
+            // Never place on the bottom edge вЂ” overlaps road visuals
             if (roadDown) continue;
 
             // Lamp posts: every 8 tiles along top edge, every 5 along sides
@@ -249,7 +249,7 @@ void MapGenerator::PlaceSidewalkProps(Grid& ground, Grid& props,
 
 void MapGenerator::ApplyDistrictDensity(Grid& props, int w, int h, RNG& rng) {
     // Density culling only removes sidewalk/scatter props (grass, pokeballs).
-    // Any prop that could belong to a stamp is exempt — culling mid-stamp
+    // Any prop that could belong to a stamp is exempt вЂ” culling mid-stamp
     // leaves partial buildings which look broken.
     // Only these lightweight scatter props are eligible for culling:
     static const std::unordered_set<int> cullable = {
@@ -269,7 +269,7 @@ void MapGenerator::ApplyDistrictDensity(Grid& props, int w, int h, RNG& rng) {
             int p = props[y][x];
             if (p == 0) continue;
 
-            // Only cull lightweight scatter props — never stamp props
+            // Only cull lightweight scatter props вЂ” never stamp props
             if (cullable.find(p) == cullable.end()) continue;
 
             float dist       = std::sqrt((x - centerX) * (x - centerX) +
@@ -292,9 +292,9 @@ bool MapGenerator::IsAdjacentToRoad(const Grid& ground, int x, int y,
     return false;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 //  CAVE GENERATION METHODS
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 void MapGenerator::CarvePath(Grid& grid,
                               int startX, int startY,
@@ -485,9 +485,9 @@ void MapGenerator::PlaceGuardNPCs(const Grid& ground, Grid& props,
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 //  UTILITY & STAMP SYSTEM
-// ─────────────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 StampCollection MapGenerator::LoadStamps(const std::string& filepath) {
     StampCollection collection;
@@ -502,7 +502,7 @@ StampCollection MapGenerator::LoadStamps(const std::string& filepath) {
     try { file >> j; }
     catch (const json::parse_error& e) {
         std::cerr << "MapGenerator: JSON parse error in " << filepath
-                  << " — " << e.what() << "\n";
+                  << " вЂ” " << e.what() << "\n";
         return collection;
     }
 
@@ -729,3 +729,5 @@ bool MapGenerator::PlaceExit(Grid& props, const Grid& ground,
             }
     return false;
 }
+
+

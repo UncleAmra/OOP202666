@@ -74,18 +74,14 @@ if (m_UseDynamicZ) {
     float spriteHeight = m_Drawable ? (m_Drawable->GetSize().y * GameConfig::SCALE) : 0.0f;
     float heightWeight = spriteHeight * 0.00002f;
 
-    float tiebreak;
-    if (m_GridY >= 0) {
+    float tiebreak = 0.0f;
+    if (m_GridY >= 0 && m_GridX >=0) {
         // Use gridY as the primary tiebreak (gives stable per-row sorting)
         // Scale it tiny so it never overrides Y order or layer.
-        float gridYContribution = (m_GridY % 1000) * 0.000001f; // very small range
-        // Add a microscopically smaller X-based term to separate objects in the same row+gridY cell.
-        float xContribution = fmod(m_Transform.translation.x * 0.0000001f, 0.00000001f);
-        tiebreak = gridYContribution + xContribution + heightWeight;
-    } else {
-        // Fallback when gridY is invalid: use continuous X+Y hash (like the old fallback)
-        float posKey = m_Transform.translation.x + m_Transform.translation.y * 1000.0f;
-        tiebreak = fmod(posKey * 0.0001f, 1.0f) + heightWeight;
+        int cantorKey = (m_GridX >= 0 && m_GridY >= 0)
+              ? ((m_GridX + m_GridY) * (m_GridX + m_GridY + 1) / 2 + m_GridY)
+              : (int)(m_Transform.translation.x + m_Transform.translation.y * 1000);
+        tiebreak = cantorKey * 0.000001f + heightWeight;
     }
 
     // Priority: m_BaseZIndex (layer) > yOffset (row) > tiebreak (gridY + X + height)

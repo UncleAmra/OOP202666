@@ -41,6 +41,8 @@ namespace GameConfig {
     constexpr int TILE_WALLSTONE6   = 69;
     constexpr int TILE_WALLSTONE7   = 80;
     constexpr int TILE_WALLSTONE8   = 81;
+    constexpr int TILE_ELEVATOR_FLOOR  = 82;
+
 
     // Prop IDs 
     constexpr int PROP_POKECENTER       = 3;
@@ -91,6 +93,9 @@ namespace GameConfig {
     constexpr int STAIRS_LEFT1          = 82;
     constexpr int WOODEN_TABLE          = 83;
     constexpr int WOODEN_DECK           = 84;
+    constexpr int PROP_ELEVATORDOOR_R_TO_L   = 85;
+    
+
 
 
     constexpr int PROP_NTUT_BUILDING1       = 550;
@@ -128,6 +133,7 @@ namespace GameConfig {
     constexpr int SHOP_KEEPER   = 102;
     constexpr int NPC_STUDENT1 = 103;
     constexpr int SHOP_KEEPER2   = 104;
+    constexpr int NPC_SECURITY1 = 105;
 
 
 

@@ -41,14 +41,29 @@ struct PropProperties {
  
 };
 
+struct PatrolPoint {
+    int gridX;
+    int gridY;
+};
+
 struct NPCProperties {
-    std::string texturePath;
-    float visualOffsetY = 0.0f; 
-    float zIndex = 0.8f;    
-    bool dynamicZ = true;
-    std::string dialogueFilePath;
-    NPCAction actionType = NPCAction::NONE; 
-    std::string actionData = "";
+    // ---- Existing ----
+    std::string  texturePath;
+    float        visualOffsetY;
+    float        zIndex;
+    bool         dynamicZ;
+    std::string  dialogueFilePath;
+    NPCAction    actionType     = NPCAction::NONE;
+    std::string  actionData     = "";
+    ItemCategory itemCategory   = ItemCategory::GENERAL; // ← was missing
+
+    // ---- New: movement ----
+    MovementType             movementType  = MovementType::STILL;
+    float                    moveInterval  = 2.0f;
+    int                      wanderRadius  = 3;
+    std::vector<PatrolPoint> patrolPoints  = {};
+    std::string flagOnInteract;
+    
 };
 
 struct ItemProperties {
@@ -129,7 +144,7 @@ private:
 
     // Track which tiles are currently in the renderer
     std::vector<bool> m_TileVisible; // parallel to m_Tiles
-    
+   
 };
 
 #endif

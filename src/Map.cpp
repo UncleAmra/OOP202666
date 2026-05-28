@@ -58,16 +58,63 @@ void Map::InitTileRegistry() {
     m_TileRegistry[GameConfig::TILE_WALLSTONE7]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone7.png"),     0.1f, 0.0f, false };
     m_TileRegistry[GameConfig::TILE_WALLSTONE8]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/wallstone8.png"),     0.1f, 0.0f, false };
     m_TileRegistry[GameConfig::TILE_CLASS_TILE]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/ClassTile.png"),     0.1f, 0.0f, true };
+    m_TileRegistry[GameConfig::TILE_ELEVATOR_FLOOR]    = { ResourceManager::GetImageStore().Get(TILE_DIR + "/ElevatorTile.png"),     0.1f, 0.0f, true };
+
 
 }
 
 void Map::InitNPCRegistry() {
-    // ID = { spritePath, visualOffsetY, zIndex, dynamicZ, dialoguePath, NPCAction, actionData }
-    m_NPCRegistry[GameConfig::NPC_NURSE]   = NPCProperties{ NPC_DIR + "Nurse",      12.0f, 0.2f, false, DIALOGUE_DIR + "nurse.txt", NPCAction::HEAL,   ""            };
-    m_NPCRegistry[GameConfig::NPC_TA1]     = NPCProperties{ NPC_DIR + "TA0",       -12.0f, 0.5f, true,  DIALOGUE_DIR + "ta.txt",    NPCAction::BATTLE, "Trainer_TA"  };
-    m_NPCRegistry[GameConfig::NPC_STUDENT1]     = NPCProperties{ NPC_DIR + "Student1",       -16.0f, 0.5f, true,  DIALOGUE_DIR + "student1.txt",    NPCAction::BATTLE, "Trainer_Student1"  };
-    m_NPCRegistry[GameConfig::SHOP_KEEPER] = NPCProperties{ NPC_DIR + "ShopKeeper",-12.0f, 0.5f, true,  DIALOGUE_DIR + "ta.txt",    NPCAction::SHOP,   "Mart_Potions"};
-    m_NPCRegistry[GameConfig::SHOP_KEEPER2] = NPCProperties{ NPC_DIR + "ShopKeeper",-12.0f, 0.5f, true,  DIALOGUE_DIR + "shopkeeper.txt",    NPCAction::GIVE_ITEM,   "potion"};
+        m_NPCRegistry[GameConfig::NPC_NURSE] = {
+        NPC_DIR + "Nurse",  12.0f, 0.2f, false,
+        DIALOGUE_DIR + "nurse.txt",
+        NPCAction::HEAL
+    };
+
+    m_NPCRegistry[GameConfig::SHOP_KEEPER] = {
+        NPC_DIR + "ShopKeeper", -12.0f, 0.8f, true,
+        DIALOGUE_DIR + "shopkeeper.txt",
+        NPCAction::SHOP, "Mart_Potions"
+    };
+
+    m_NPCRegistry[GameConfig::SHOP_KEEPER2] = {
+        NPC_DIR + "ShopKeeper", -12.0f, 0.8f, true,
+        DIALOGUE_DIR + "shopkeeper.txt",
+        NPCAction::GIVE_ITEM, "potion", ItemCategory::GENERAL
+    };
+
+    // --- Battle NPCs: LOOK_AROUND while waiting ---
+    m_NPCRegistry[GameConfig::NPC_TA1] = {
+        NPC_DIR + "TA0", -12.0f, 0.8f, true,
+        DIALOGUE_DIR + "ta.txt",
+        NPCAction::BATTLE, "Trainer_TA",
+        ItemCategory::GENERAL,              // not used for BATTLE
+        MovementType::LOOK_AROUND,
+        1.8f,
+        1,
+        {},
+        "met_ta1"  
+    };
+
+    m_NPCRegistry[GameConfig::NPC_STUDENT1] = {
+        NPC_DIR + "Student2", -8.0f, 0.8f, true,
+        DIALOGUE_DIR + "student1.txt",
+        NPCAction::BATTLE, "Trainer_Student1",
+        ItemCategory::GENERAL,
+        MovementType::WANDER,
+        3.5f,   // move interval
+        2       // wander radius: stays within 2 tiles of spawn
+    };
+
+    m_NPCRegistry[GameConfig::NPC_SECURITY1] = {
+        NPC_DIR + "Security1", -8.0f, 0.8f, true,
+        DIALOGUE_DIR + "guard.txt",
+        NPCAction::NONE, "",
+        ItemCategory::GENERAL,
+        MovementType::PATROL,
+        0.6f,  // fast steps between waypoints
+        0,     // wanderRadius unused for PATROL
+        { {18, 15}, {18, 19} }  // PatrolPoints: walks tile (10,5) ↔ (10,12)
+    };
 
 }
 
@@ -164,6 +211,8 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::DOOR_OPENING_GYM] = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.8f, true, true,  2.0f,  20.0f };
     m_PropRegistry[GameConfig::DOOR_OPENING_PC]  = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.8f, true, true,  0.0f,  16.0f };
     m_PropRegistry[GameConfig::DOOR_OPENING_PM]  = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.8f, true, true,  2.0f,  32.0f };
+    m_PropRegistry[GameConfig::PROP_ELEVATORDOOR_R_TO_L]  = { { PROP_DIR + "/ElevatorDoorRtoL.png"}, 0.8f, true, true,  -12.0f,  8.0f };
+
 
     // Tall grass (interactive)
     m_PropRegistry[GameConfig::PROP_TALLGRASS] = {
@@ -311,21 +360,32 @@ void Map::SpawnTilesAndProps() {
             // NPCs
             if (m_NPCRegistry.count(propID) > 0) {
                 const NPCProperties& npcProps = m_NPCRegistry[propID];
+
                 auto npc = std::make_shared<NPC>(
-                    worldX, worldY + npcProps.visualOffsetY * GameConfig::SCALE/3.0f,
+                    worldX, worldY + npcProps.visualOffsetY * GameConfig::SCALE / 3.0f,
                     npcProps.texturePath, npcProps.dialogueFilePath, "", ""
                 );
+
                 npc->SetGridPosition(x, y);
+                npc->SetSpawnPoint(x, y);          // ← records home tile for wander radius
                 npc->SetZIndex(npcProps.zIndex);
                 npc->SetBaseZIndex(npcProps.zIndex);
                 npc->SetDynamicZ(npcProps.dynamicZ);
-                npc->SetAction(npcProps.actionType, npcProps.actionData);
+                npc->SetAction(npcProps.actionType, npcProps.actionData, npcProps.itemCategory);
 
                 if (npcProps.actionType == NPCAction::BATTLE) {
                     auto loadedParty = TrainerDatabase::CreateTrainerParty(npcProps.actionData);
                     for (const auto& p : loadedParty) npc->GetParty().push_back(p);
                 }
 
+                // ↓ This entire block was missing — without it every NPC is STILL
+                npc->SetMovementType(npcProps.movementType);
+                npc->SetMoveInterval(npcProps.moveInterval);
+                npc->SetWanderRadius(npcProps.wanderRadius);
+                for (const auto& point : npcProps.patrolPoints) {
+                    npc->AddPatrolPoint(point.gridX, point.gridY);
+                }
+                npc->SetInteractFlag(npcProps.flagOnInteract);
                 m_NPCs.push_back(npc);
                 AddToRenderer(npc);
             }

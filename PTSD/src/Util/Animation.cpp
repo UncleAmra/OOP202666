@@ -37,7 +37,6 @@ void Animation::Play() {
         m_IsChangeFrame = false;
     }
     m_State = State::PLAY;
-    
 }
 
 void Animation::Pause() {
@@ -66,16 +65,32 @@ void Animation::Update() {
     if (updateFrameCount <= 0)
         return;
 
+    // FIX 1: Keep the remainder so timing drift doesn't accumulate.
+    // Previously this was set to 0, which discarded sub-interval time and
+    // caused frames to be skipped on slower machines.
+    m_TimeBetweenFrameUpdate -= updateFrameCount * m_Interval;
+
     m_Index += updateFrameCount;
-    m_TimeBetweenFrameUpdate = 0;
 
     unsigned int const totalFramesCount = m_Frames.size();
     if (m_Index >= totalFramesCount) {
         if (m_Looping) {
-            m_CooldownEndTime = nowTime + m_Cooldown;
+            // FIX 2: When cooldown is 0, loop instantly back to frame 0 and
+            // stay in PLAY state. The original code always went through
+            // COOLDOWN and sat on the last frame for one Draw() call, causing
+            // a one-frame flicker at the end of every walk cycle.
+            if (m_Cooldown == 0) {
+                m_Index = 0;
+                // m_State stays PLAY — no flicker, no state transition needed.
+            } else {
+                m_Index = m_Frames.size() - 1;
+                m_CooldownEndTime = nowTime + m_Cooldown;
+                m_State = State::COOLDOWN;
+            }
+        } else {
+            m_Index = m_Frames.size() - 1;
+            m_State = State::ENDED;
         }
-        m_State = m_Looping ? State::COOLDOWN : State::ENDED;
-        m_Index = m_Frames.size() - 1;
     }
-};
+}
 } // namespace Util

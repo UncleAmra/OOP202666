@@ -185,7 +185,9 @@ void App::Update() {
                     m_DialogueUI->SetVisible(false);
 
                     // 2. Determine what happens next based on the Active NPC
-                    if (m_ActiveNPC) {
+                    if (m_ActiveNPC && !m_ActiveNPC->GetInteractFlag().empty()) {
+                        GameFlags::Set(m_ActiveNPC->GetInteractFlag(), true);
+
                         NPCAction action = m_ActiveNPC->GetActionType();
                         std::string data = m_ActiveNPC->GetActionData();
 

@@ -11,7 +11,7 @@
       "name": "Student1",
       "party": [
         { "species": "Charizard", "level": 36 },
-        { "species": "Tododile", "level": 6 }
+        { "species": "Totodile", "level": 6 }
       ]
     }
   }

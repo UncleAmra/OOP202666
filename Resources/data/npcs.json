@@ -1,0 +1,135 @@
+{
+  "_comment": "NPC id values must match your GameConfig constants (e.g. GameConfig::NPC_NURSE).",
+
+  "npcs": [
+    {
+      "id": 100,
+      "texture": "Nurse",
+      "visualOffsetY": 12.0,
+      "zIndex": 0.2,
+      "dynamicZ": false,
+      "dialogueFile": "nurse.txt",
+      "action": "HEAL",
+      "actionData": "",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "STILL",
+        "moveInterval": 2.0,
+        "wanderRadius": 3,
+        "patrolPoints": []
+      }
+    },
+    {
+      "id": 101,
+      "texture": "ShopKeeper",
+      "visualOffsetY": -12.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "shopkeeper.txt",
+      "action": "SHOP",
+      "actionData": "Mart_Potions",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "STILL",
+        "moveInterval": 2.0,
+        "wanderRadius": 3,
+        "patrolPoints": []
+      }
+    },
+    {
+      "id": 104,
+      "texture": "ShopKeeper",
+      "visualOffsetY": -12.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "shopkeeper.txt",
+      "action": "GIVE_ITEM",
+      "actionData": "potion",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "STILL",
+        "moveInterval": 2.0,
+        "wanderRadius": 3,
+        "patrolPoints": []
+      }
+    },
+    {
+      "id": 101,
+      "texture": "TA0",
+      "visualOffsetY": -12.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "ta.txt",
+      "action": "BATTLE",
+      "actionData": "Trainer_TA",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "met_ta1",
+      "movement": {
+        "type": "LOOK_AROUND",
+        "moveInterval": 1.8,
+        "wanderRadius": 1,
+        "patrolPoints": []
+      }
+    },
+    {
+      "id": 103,
+      "texture": "Student2",
+      "visualOffsetY": -8.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "student1.txt",
+      "action": "BATTLE",
+      "actionData": "Trainer_Student1",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "WANDER",
+        "moveInterval": 3.5,
+        "wanderRadius": 2,
+        "patrolPoints": []
+      }
+    },
+        {
+      "id": 106,
+      "texture": "Student1",
+      "visualOffsetY": -8.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "student1.txt",
+      "action": "BATTLE",
+      "actionData": "Trainer_Student1",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "LOOK_AROUND",
+        "moveInterval": 1.8,
+        "wanderRadius": 1,
+        "patrolPoints": []
+      }
+    },
+    {
+      "id": 105,
+      "texture": "Security1",
+      "visualOffsetY": -8.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "guard.txt",
+      "action": "NONE",
+      "actionData": "",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "PATROL",
+        "moveInterval": 0.6,
+        "wanderRadius": 0,
+        "patrolPoints": [
+          { "x": 18, "y": 15 },
+          { "x": 18, "y": 19 }
+        ]
+      }
+    }
+  ]
+}

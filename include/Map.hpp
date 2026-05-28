@@ -144,7 +144,10 @@ private:
 
     // Track which tiles are currently in the renderer
     std::vector<bool> m_TileVisible; // parallel to m_Tiles
-   
+    void LoadNPCsFromJSON(const std::string& path);
+    static NPCAction    StringToAction  (const std::string& s);
+    static MovementType StringToMovement(const std::string& s);
+    static ItemCategory StringToCategory(const std::string& s);   
 };
 
 #endif

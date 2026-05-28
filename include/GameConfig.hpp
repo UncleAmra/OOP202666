@@ -94,6 +94,10 @@ namespace GameConfig {
     constexpr int WOODEN_TABLE          = 83;
     constexpr int WOODEN_DECK           = 84;
     constexpr int PROP_ELEVATORDOOR_R_TO_L   = 85;
+    constexpr int PROP_ELEVATOR_WALL   = 86;
+    constexpr int PROP_HALLWAY_DOOR   = 87;
+    constexpr int PROP_HALLWAY_WALL   = 88;
+
     
 
 
@@ -186,9 +190,9 @@ namespace GameConfig {
     inline std::unordered_map<std::string, int> MapBorders = {
         { RESOURCE_DIR "/maps/level", PROP_TREE }, // Town gets surrounded by trees
         { RESOURCE_DIR "/maps/NTUT", PROP_TREE }   // NTUT gets surrounded by trees
-        // We leave "/maps/inside" out of this list so it defaults to the void!
+       // We leave "/maps/inside" out of this list so it defaults to the void!
     };
-    */
+    */ 
 
     inline std::unordered_map<std::string, WarpDestination> DoorRouting;
 }

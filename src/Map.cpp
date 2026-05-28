@@ -8,6 +8,8 @@
 #include <iostream> 
 #include "TrainerDatabase.hpp"
 #include "ResourceManager.hpp"
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
 
 //paths to assets
 const std::string RES        = std::string(RESOURCE_DIR);
@@ -16,6 +18,7 @@ const std::string MAP_DIR    = RES + "/maps/";
 const std::string PROP_DIR   = RES + "/props/";
 const std::string NPC_DIR    = RES + "/npcs/";
 const std::string DIALOGUE_DIR = RES + "/dialogue/";
+const std::string DATA_DIR = RES +  "/data/";
 
 // Half-screen dimensions — match your actual window size
 static constexpr float HALF_W = 640.0f;
@@ -28,6 +31,110 @@ Map::Map() {
     InitItemRegistry();
 }
 
+MovementType Map::StringToMovement(const std::string& s) {
+    if (s == "LOOK_AROUND") return MovementType::LOOK_AROUND;
+    if (s == "WANDER")      return MovementType::WANDER;
+    if (s == "PATROL")      return MovementType::PATROL;
+    if (s != "STILL" && !s.empty())
+        LOG_WARN("NPCRegistry: unknown movement '{}', defaulting to STILL", s);
+    return MovementType::STILL;
+}
+ 
+ItemCategory Map::StringToCategory(const std::string& s) {
+    if (s == "POKEBALLS") return ItemCategory::POKEBALLS;
+    if (s == "KEY_ITEMS") return ItemCategory::KEY_ITEMS;
+    if (s != "GENERAL" && !s.empty())
+        LOG_WARN("NPCRegistry: unknown itemCategory '{}', defaulting to GENERAL", s);
+    return ItemCategory::GENERAL;
+}
+
+NPCAction Map::StringToAction(const std::string& s) {
+    if (s == "HEAL")      return NPCAction::HEAL;
+    if (s == "SHOP")      return NPCAction::SHOP;
+    if (s == "GIVE_ITEM") return NPCAction::GIVE_ITEM;
+    if (s == "BATTLE")    return NPCAction::BATTLE;
+    if (s != "NONE" && !s.empty())
+        LOG_WARN("NPCRegistry: unknown action '{}', defaulting to NONE", s);
+    return NPCAction::NONE;
+}
+
+// ============================================================
+//  LoadNPCsFromJSON
+//  Fills m_NPCRegistry from a JSON file.
+//  The id field in each entry must match your GameConfig NPC
+//  constants — open GameConfig.hpp and copy the values into
+//  npcs.json if you haven't already.
+// ============================================================
+void Map::LoadNPCsFromJSON(const std::string& path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        LOG_ERROR("NPCRegistry: could not open '{}'", path);
+        return;
+    }
+ 
+    json root;
+    try {
+        file >> root;
+    } catch (const json::parse_error& e) {
+        LOG_ERROR("NPCRegistry: JSON parse error in '{}': {}", path, e.what());
+        return;
+    }
+ 
+    if (!root.contains("npcs") || !root["npcs"].is_array()) {
+        LOG_ERROR("NPCRegistry: '{}' is missing a top-level \"npcs\" array", path);
+        return;
+    }
+ 
+    int loaded = 0;
+    for (const auto& entry : root["npcs"]) {
+        // --- Required fields ---
+        if (!entry.contains("id")) {
+            LOG_WARN("NPCRegistry: entry missing \"id\", skipping");
+            continue;
+        }
+ 
+        const int id = entry["id"].get<int>();
+ 
+        NPCProperties props;
+ 
+        // Texture and dialogue paths use the same directory constants as
+        // before — only the filename is stored in JSON.
+        props.texturePath      = NPC_DIR      + entry.value("texture",     "");
+        props.dialogueFilePath = DIALOGUE_DIR + entry.value("dialogueFile","");
+        props.visualOffsetY    = entry.value("visualOffsetY", 0.0f);
+        props.zIndex           = entry.value("zIndex",        0.5f);
+        props.dynamicZ         = entry.value("dynamicZ",      true);
+        props.actionType       = StringToAction  (entry.value("action",       "NONE"));
+        props.actionData       = entry.value("actionData",    "");
+        props.itemCategory     = StringToCategory(entry.value("itemCategory", "GENERAL"));
+        props.flagOnInteract   = entry.value("flagOnInteract","");
+ 
+        // --- Movement block (optional — defaults to STILL) ---
+        if (entry.contains("movement") && entry["movement"].is_object()) {
+            const auto& mov    = entry["movement"];
+            props.movementType = StringToMovement(mov.value("type",         "STILL"));
+            props.moveInterval = mov.value("moveInterval", 2.0f);
+            props.wanderRadius = mov.value("wanderRadius", 3);
+ 
+            if (mov.contains("patrolPoints") && mov["patrolPoints"].is_array()) {
+                for (const auto& pt : mov["patrolPoints"]) {
+                    // Expects { "x": int, "y": int }
+                    if (!pt.contains("x") || !pt.contains("y")) {
+                        LOG_WARN("NPCRegistry: NPC id={} patrol point missing x or y, skipping point", id);
+                        continue;
+                    }
+                    props.patrolPoints.push_back({ pt["x"].get<int>(),
+                                                   pt["y"].get<int>() });
+                }
+            }
+        }
+ 
+        m_NPCRegistry[id] = std::move(props);
+        ++loaded;
+    }
+ 
+    LOG_INFO("NPCRegistry: loaded {} NPCs from '{}'", loaded, path);
+}
 // ─────────────────────────────────────────────
 //  REGISTRIES
 // ─────────────────────────────────────────────
@@ -64,59 +171,9 @@ void Map::InitTileRegistry() {
 }
 
 void Map::InitNPCRegistry() {
-        m_NPCRegistry[GameConfig::NPC_NURSE] = {
-        NPC_DIR + "Nurse",  12.0f, 0.2f, false,
-        DIALOGUE_DIR + "nurse.txt",
-        NPCAction::HEAL
-    };
-
-    m_NPCRegistry[GameConfig::SHOP_KEEPER] = {
-        NPC_DIR + "ShopKeeper", -12.0f, 0.8f, true,
-        DIALOGUE_DIR + "shopkeeper.txt",
-        NPCAction::SHOP, "Mart_Potions"
-    };
-
-    m_NPCRegistry[GameConfig::SHOP_KEEPER2] = {
-        NPC_DIR + "ShopKeeper", -12.0f, 0.8f, true,
-        DIALOGUE_DIR + "shopkeeper.txt",
-        NPCAction::GIVE_ITEM, "potion", ItemCategory::GENERAL
-    };
-
-    // --- Battle NPCs: LOOK_AROUND while waiting ---
-    m_NPCRegistry[GameConfig::NPC_TA1] = {
-        NPC_DIR + "TA0", -12.0f, 0.8f, true,
-        DIALOGUE_DIR + "ta.txt",
-        NPCAction::BATTLE, "Trainer_TA",
-        ItemCategory::GENERAL,              // not used for BATTLE
-        MovementType::LOOK_AROUND,
-        1.8f,
-        1,
-        {},
-        "met_ta1"  
-    };
-
-    m_NPCRegistry[GameConfig::NPC_STUDENT1] = {
-        NPC_DIR + "Student2", -8.0f, 0.8f, true,
-        DIALOGUE_DIR + "student1.txt",
-        NPCAction::BATTLE, "Trainer_Student1",
-        ItemCategory::GENERAL,
-        MovementType::WANDER,
-        3.5f,   // move interval
-        2       // wander radius: stays within 2 tiles of spawn
-    };
-
-    m_NPCRegistry[GameConfig::NPC_SECURITY1] = {
-        NPC_DIR + "Security1", -8.0f, 0.8f, true,
-        DIALOGUE_DIR + "guard.txt",
-        NPCAction::NONE, "",
-        ItemCategory::GENERAL,
-        MovementType::PATROL,
-        0.6f,  // fast steps between waypoints
-        0,     // wanderRadius unused for PATROL
-        { {18, 15}, {18, 19} }  // PatrolPoints: walks tile (10,5) ↔ (10,12)
-    };
-
+    LoadNPCsFromJSON(DATA_DIR + "npcs.json");
 }
+
 
 void Map::InitPropRegistry() {
     // FORMAT: { {"Frame1", ...}, zIndex, dynamicZ, isWalkable, offsetX, offsetY }
@@ -145,7 +202,7 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING2]      = { {PROP_DIR + "/Building2.png"},          0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING3]      = { {PROP_DIR + "/ntut_build_5.png"},       0.8f, true,  false, 0.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING4]      = { {PROP_DIR + "/Building4.png"},          0.8f, true,  false, 24.0f,  0.0f  };
-    m_PropRegistry[GameConfig::WOODEN_DECK]              = { {PROP_DIR + "/deck.png"},               0.8f, true,  false, 24.0f, 0.0f  };
+    m_PropRegistry[GameConfig::WOODEN_DECK]              = { {PROP_DIR + "/deck.png"},               0.1f, true,  false, 24.0f, 0.0f  };
     //558
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING5]      = { {PROP_DIR + "/Building5.png"},          0.8f, true,  false, -16.0f,  0.0f  };
     m_PropRegistry[GameConfig::PROP_NTUT_BUILDING6]      = { {PROP_DIR + "/Building6.png"},          0.8f, true,  false, 0.0f,  0.0f  };
@@ -212,12 +269,20 @@ void Map::InitPropRegistry() {
     m_PropRegistry[GameConfig::DOOR_OPENING_PC]  = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.8f, true, true,  0.0f,  16.0f };
     m_PropRegistry[GameConfig::DOOR_OPENING_PM]  = { { PROP_DIR + "/door0.png", PROP_DIR + "/door1.png", PROP_DIR + "/door2.png", PROP_DIR + "/door3.png" }, 0.8f, true, true,  2.0f,  32.0f };
     m_PropRegistry[GameConfig::PROP_ELEVATORDOOR_R_TO_L]  = { { PROP_DIR + "/ElevatorDoorRtoL.png"}, 0.8f, true, true,  -12.0f,  8.0f };
+    m_PropRegistry[GameConfig::PROP_HALLWAY_DOOR]  = { { PROP_DIR + "/HallWayDoor.png"}, 0.3f, true, true,  -24.0f,  56.0f };
+    m_PropRegistry[GameConfig::PROP_HALLWAY_WALL]  = { { PROP_DIR + "/HallWayWall.png"}, 0.4f, true, true,  -24.0f,  56.0f };
 
 
     // Tall grass (interactive)
     m_PropRegistry[GameConfig::PROP_TALLGRASS] = {
         { PROP_DIR + "/TallGrass2.png", PROP_DIR + "/TallGrass3.png", PROP_DIR + "/TallGrass4.png" },
         0.815f, true, true, 0.0f, 0.0f
+    };
+
+    m_PropRegistry[GameConfig::PROP_ELEVATOR_WALL] = {
+        { PROP_DIR + "/ElevatorWall1.png", PROP_DIR + "/ElevatorWall2.png", PROP_DIR + "/ElevatorWall3.png"},
+        0.815f, true, true, 0.0f, 64.0f,
+        PropAnimMode::STATIC, 100
     };
 
     // Animated signs / decorations

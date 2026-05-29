@@ -123,15 +123,16 @@ namespace GameConfig {
     constexpr int GEN_BUILDING2             = 567;
     constexpr int CITY_BUILD1               = 568;
 
+    constexpr int PROP_POKEMART      = 52;
+    constexpr int PROP_POKEMART_SIGN = 53;
+    constexpr int PROP_WOODEN_HOUSE  = 54;
      //
 
 
     // Item IDs
     constexpr int ITEM_POTION   = 50;
     constexpr int ITEM_POKEBALL = 51;
-    constexpr int POKEMART      = 52;
-    constexpr int POKEMART_SIGN = 53;
-    constexpr int WOODEN_HOUSE  = 54;
+
 
     //NPC IDs
     constexpr int NPC_NURSE     = 100;

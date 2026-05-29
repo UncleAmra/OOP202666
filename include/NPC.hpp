@@ -98,8 +98,14 @@ public:
     // flag check logic
     void SetInteractFlag(const std::string& flag) { m_InteractFlag = flag; }
     const std::string& GetInteractFlag() const { return m_InteractFlag; }
+    void SetFlagToHide(const std::string& flag) { m_FlagToHide = flag; }
+    const std::string& GetFlagToHide() const { return m_FlagToHide; }
+    std::string m_FlagToHide;
+
     std::string m_InteractFlag;
     bool IsActive() const;
+
+
 protected:
     void LoadSprites() override;
 

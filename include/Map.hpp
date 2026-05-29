@@ -15,7 +15,7 @@
 #include <memory>
 #include <unordered_map> 
 
-// ADDED: The blueprint for every tile!
+// Blueprint for every tile
 struct TileProperties {
     std::shared_ptr<Util::Image> texture;
     float zIndex = 0.0f;
@@ -26,7 +26,7 @@ struct TileProperties {
 enum class PropAnimMode {
     STATIC,       // Default — never changes frame automatically
     LOOP,         // Cycles through all frames continuously  
-    PING_PONG     // Plays forward then backward (good for flickering effects)
+    PING_PONG     // Plays forward then backward
 };
 
 struct PropProperties {
@@ -38,7 +38,6 @@ struct PropProperties {
     float visualOffsetY = 0.0f; 
     PropAnimMode animMode = PropAnimMode::STATIC;  
     int animFrameDelay = 8; 
- 
 };
 
 struct PatrolPoint {
@@ -47,7 +46,6 @@ struct PatrolPoint {
 };
 
 struct NPCProperties {
-    // ---- Existing ----
     std::string  texturePath;
     float        visualOffsetY;
     float        zIndex;
@@ -57,15 +55,14 @@ struct NPCProperties {
     std::string  actionData     = "";
     ItemCategory itemCategory   = ItemCategory::GENERAL;
 
-    // ---- Existing Movement ----
     MovementType             movementType  = MovementType::STILL;
     float                    moveInterval  = 2.0f;
     int                      wanderRadius  = 3;
     std::vector<PatrolPoint> patrolPoints  = {};
-    std::string flagOnInteract;
+    std::string              flagOnInteract;
     
-    // ---- ADDED FOR ROADBLOCKS ----
-    std::string disappearFlag = ""; // If this flag is true, NPC vanishes & unblocks path
+    // ROADBLOCKS / CONDITIONAL HIDING
+    std::string flagToHide = ""; // If this flag is true, NPC vanishes & unblocks path
 };
 
 struct ItemProperties {
@@ -77,7 +74,7 @@ struct ItemProperties {
 
 class Item;
 class Prop;
-class Player; // Forward declaration
+class Player; 
 
 class Map : public Util::GameObject, public std::enable_shared_from_this<Map> {
 public:
@@ -87,25 +84,20 @@ public:
     void Move(float dx, float dy);
     void Draw(); 
     bool IsWalkable(int x, int y);
-    
-    // ONLY ONE Update signature now!
     void Update();
-    
     int GetTileType(int gridX, int gridY);
-    void LoadLevel(const std::string& filepath);
+    void LoadLevel(const std::string& mapName);
     std::shared_ptr<NPC> GetNPCAt(int gridX, int gridY);
     std::string GetCurrentLevelPath() const { return m_CurrentLevelPath; }
     std::string CollectItemAt(int gridX, int gridY, Character& player);
     void SetRenderer(std::weak_ptr<Util::Renderer> renderer);
     void UpdateSteppedProps(int playerGridX, int playerGridY);
-    void UpdatePropOverlap(int playerGridX, int playerGridY, float playerFootY);
 
     void SetVisible(bool visible);
     void LoadConnections(const std::string& filepath);
-    // New overload — accepts generated data directly, skips CSV loading
     void LoadGeneratedLevel(const std::string& mapName,
-                        std::vector<std::vector<int>> groundData,
-                        std::vector<std::vector<int>> propData);
+                            std::vector<std::vector<int>> groundData,
+                            std::vector<std::vector<int>> propData);
     
 private:
     // --- MAP DATA ---
@@ -137,19 +129,19 @@ private:
 
     // --- HELPER FUNCTIONS ---
     std::vector<std::vector<int>> LoadCSV(const std::string& filepath);
-    
     void ClearMap();
 
     int m_OutOfBoundsPropID = -1;
-
-    void UpdateVisibleTiles(float cameraX, float cameraY, int screenW, int screenH);
-
-    // Track which tiles are currently in the renderer
     std::vector<bool> m_TileVisible; // parallel to m_Tiles
+    
     void LoadNPCsFromJSON(const std::string& path);
+    void LoadTilesFromJSON(const std::string& path);
+    void LoadPropsFromJSON(const std::string& path);
+    void LoadItemsFromJSON(const std::string& path);
+    
     static NPCAction    StringToAction  (const std::string& s);
     static MovementType StringToMovement(const std::string& s);
     static ItemCategory StringToCategory(const std::string& s);   
 };
 
-#endif
+#endif // MAP_HPP

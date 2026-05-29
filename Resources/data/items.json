@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "id": 100, "texture": "PokeBall.png", "name": "Potion",   "category": "GENERAL",   "zIndex": 0.5 },
+    { "id": 101, "texture": "PokeBall.png", "name": "Pokeball", "category": "POKEBALLS", "zIndex": 0.5 }
+  ]
+}

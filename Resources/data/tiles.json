@@ -1,0 +1,31 @@
+{
+  "tiles": [
+    { "id": 0,  "texture": "Grass1.png",       "zIndex": 0.0, "yOffset": 0.0, "walkable": true  },
+    { "id": 1,  "texture": "",               "zIndex": 0.0, "yOffset": 0.0, "walkable": false },
+    { "id": 2,  "texture": "Dirt1.png",        "zIndex": 0.0, "yOffset": 0.0, "walkable": true  },
+    { "id": 4,  "texture": "Concrete.png",     "zIndex": 0.0, "yOffset": 0.0, "walkable": true  },
+    { "id": 5,  "texture": "Gravel.png",       "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 6,  "texture": "Dirt1.png",        "zIndex": 0.0, "yOffset": 0.0, "walkable": false },
+    { "id": 9,  "texture": "PCFloorTile.png",  "zIndex": 0.0, "yOffset": 0.0, "walkable": true  },
+    { "id": 10, "texture": "Sand.png",         "zIndex": 0.0, "yOffset": 0.0, "walkable": true  },
+    { "id": 11, "texture": "PCWall1.png",      "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 12, "texture": "Road.png",         "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 14, "texture": "CalmWater.png",    "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 15, "texture": "RedBrick.png",     "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 16, "texture": "GreyBrick.png",    "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 17, "texture": "ClassTile.png",    "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 20, "texture": "PokeMartTile.png", "zIndex": 0.0, "yOffset": 0.0, "walkable": true  },
+    { "id": 63, "texture": "wallstone1.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 64, "texture": "wallstone2.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 65, "texture": "wallstone3.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 66, "texture": "wallstone4.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 67, "texture": "church_inside.png","zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 68, "texture": "wallstone5.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 69, "texture": "wallstone6.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 80, "texture": "wallstone7.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 81, "texture": "wallstone8.png",   "zIndex": 0.1, "yOffset": 0.0, "walkable": false },
+    { "id": 82, "texture": "ElevatorTile.png", "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 83, "texture": "deck.png",         "zIndex": 0.1, "yOffset": 0.0, "walkable": true  },
+    { "id": 99, "texture": "",               "zIndex": 0.0, "yOffset": 0.0, "walkable": true  }
+  ]
+}

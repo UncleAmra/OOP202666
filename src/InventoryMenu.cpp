@@ -12,7 +12,7 @@ InventoryMenu::InventoryMenu(std::shared_ptr<Util::Renderer> renderer) {
     m_BoxUI->m_Transform.translation = {0.0f, 0.0f}; 
 
     m_TextUI = std::make_shared<Util::GameObject>();
-    m_Text = std::make_shared<Util::Text>(
+    m_Text   = std::make_shared<Util::Text>(
         RESOURCE_DIR "/Fonts/micross.ttf", 
         24, "Inventory", Util::Color(50, 50, 50) 
     );

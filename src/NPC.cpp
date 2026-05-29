@@ -2,6 +2,7 @@
 #include "Map.hpp"
 #include "Util/Time.hpp"
 #include "Util/Logger.hpp"
+#include "GameFlags.hpp"
 #include "Util/Animation.hpp"
 
 #include <fstream>
@@ -33,26 +34,38 @@ NPC::NPC(float x, float y,
     LoadDialogue(altDialoguePath, m_AltDialogueLines);
     LoadSprites();
 }
+// Inside src/NPC.cpp
 
+bool NPC::IsActive() const {
+    // If the NPC has a flag, its active state is inverse to the flag 
+    // (i.e., if "roadblock_cleared" is true, the NPC should NOT be active/visible anymore).
+    if (!m_InteractFlag.empty()) {
+        return !GameFlags::Get(m_InteractFlag);
+    }
+    return true; // Default to active if there's no game flag attached
+}
 // ============================================================
 //  Update
 // ============================================================
 glm::vec2 NPC::Update(std::shared_ptr<Map> map) {
+    if (!IsActive()) {
+        SetVisible(false); // <-- THIS hides the NPC from the Renderer!
+        return glm::vec2(0.0f, 0.0f); // Vanished NPCs don't move or think
+    }
+    
+    // Safety fallback: if a flag gets reversed, make sure they reappear
+    SetVisible(true); 
+
     // Always finish any in-progress tile movement first.
     if (m_IsMoving) {
         glm::vec2 movement = Character::Update(map);
-        // NPCs are part of the scrolling world (Map::Move shifts their transforms
-        // for camera movement), so self-movement must ALSO be applied here.
-        // Without this line the grid position updates but the sprite never moves.
-        m_Transform.translation += movement;
-        return movement;
     }
-
     // Freeze decisions during dialogue — the NPC finishes its current step
     // then holds still until SetLocked(false) is called.
-    if (m_Locked) {
+    /*if (m_Locked) {
         return Character::Update(map);
     }
+    */
 
     // Tick the decision timer.
     float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;

@@ -627,8 +627,13 @@ bool Map::IsWalkable(int x, int y) {
 
     // 4. Check NPCs
     for (const auto& npc : m_NPCs) {
+        // Skip inactive NPCs so they don't block the player
+        if (!npc->IsActive()) {
+            continue;
+        }
+
         if (npc->GetGridX() == x && npc->GetGridY() == y) {
-            printf("WALK FAILED: Blocked by an NPC at (%d, %d)!\n", x, y);
+            printf("WALK FAILED: Blocked by an active NPC at (%d, %d)!\n", x, y);
             return false;
         }
     }
@@ -648,9 +653,12 @@ int Map::GetPropType(int gridX, int gridY) {
     return m_PropData[gridY][gridX];
 }
 
-std::shared_ptr<NPC> Map::GetNPCAt(int gridX, int gridY) {
+std::shared_ptr<NPC> Map::GetNPCAt(int x, int y) {
     for (auto& npc : m_NPCs) {
-        if (npc->GetGridX() == gridX && npc->GetGridY() == gridY) return npc;
+        // Only return the NPC if it is actually standing there AND is active!
+        if (npc->IsActive() && npc->GetGridX() == x && npc->GetGridY() == y) {
+            return npc;
+        }
     }
     return nullptr;
 }

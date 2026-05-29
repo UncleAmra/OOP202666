@@ -55,15 +55,17 @@ struct NPCProperties {
     std::string  dialogueFilePath;
     NPCAction    actionType     = NPCAction::NONE;
     std::string  actionData     = "";
-    ItemCategory itemCategory   = ItemCategory::GENERAL; // ← was missing
+    ItemCategory itemCategory   = ItemCategory::GENERAL;
 
-    // ---- New: movement ----
+    // ---- Existing Movement ----
     MovementType             movementType  = MovementType::STILL;
     float                    moveInterval  = 2.0f;
     int                      wanderRadius  = 3;
     std::vector<PatrolPoint> patrolPoints  = {};
     std::string flagOnInteract;
     
+    // ---- ADDED FOR ROADBLOCKS ----
+    std::string disappearFlag = ""; // If this flag is true, NPC vanishes & unblocks path
 };
 
 struct ItemProperties {

@@ -141,6 +141,8 @@ namespace GameConfig {
 
 
 
+
+
     struct WarpDestination {
         std::string levelPath;
         int spawnX;

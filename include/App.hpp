@@ -11,7 +11,6 @@
 #include "GameConfig.hpp"
 #include "util/Text.hpp"
 
-// TODO: Implement this later for Battle triggers and special NPC events
 struct InteractionResult {
     std::vector<std::string> dialogueLines; 
     std::string specialAction;              
@@ -20,7 +19,7 @@ struct InteractionResult {
 class App {
 public:
     enum class State {
-        START,            // ADDED THIS BACK so Start() can run first!
+        START,
         UPDATE,
         DIALOGUE,         
         START_MENU,       
@@ -32,7 +31,6 @@ public:
 
     State GetCurrentState() const { return m_CurrentState; }
     
-    // Start Menu UI Elements
     std::shared_ptr<Util::GameObject> m_StartMenuBoxUI;
     std::shared_ptr<Util::GameObject> m_StartMenuCursorUI;
     std::shared_ptr<Util::GameObject> m_StartMenuTextUI;
@@ -46,7 +44,7 @@ public:
     std::shared_ptr<StartMenu> m_StartMenu;
     bool JustFinishedMoving() const { return m_JustFinishedMoving; }
 
-    
+
 private:
     void ValidTask();
     int m_SwapIndex = -1;
@@ -54,24 +52,42 @@ private:
     std::shared_ptr<Map> m_Map;
     std::shared_ptr<Util::GameObject> m_DialogueBoxUI;
     
-    State m_CurrentState = State::START; // This is now valid again!
+    State m_CurrentState = State::START;
     bool m_JustFinishedMoving = false;
     std::shared_ptr<Player> m_Character;
     std::shared_ptr<NPC> m_ActiveNPC = nullptr;
 
-    // Your UI components
-    std::shared_ptr<Util::GameObject> m_DialogueUI;
+    // --- Your UI components ---
+    std::shared_ptr<Util::GameObject> m_DialogueUI; // Confirmed GameObject
     std::shared_ptr<Util::Text> m_DialogueText;
     
     // Submenus
     std::shared_ptr<InventoryMenu> m_InventoryMenu;
     std::shared_ptr<PokemonMenu> m_PokemonMenu;
     std::shared_ptr<BattleUI> m_BattleUI;
-    
+
+    // ==========================================
+    // RESTRUCTURING HELPER FUNCTIONS
+    // ==========================================
+    void InitSystems();
+    void InitGameLoad();
+    void InitUI();
+    void PerformQuickSave();
+
+    // State Processing Delegates
+    void ProcessDialogueState();
+    void ProcessStartMenuState();
+    void ProcessPokemonMenuState();
+    void ProcessOverworldUpdateState();
+    void ProcessBattleState();
+
+    // Overworld sub-helpers
+    void HandleOverworldInteraction(int checkX, int checkY);
+    void HandleOverworldWarping();
+    void HandleOverworldEncounters();
 
     std::shared_ptr<Pokemon> GenerateWildPokemon(const std::string& mapPath);
     
-    // --- Global Input Helpers ---
     void HandleGlobalShortcuts();
     void OpenStartMenu();
     void CloseAllMenus();

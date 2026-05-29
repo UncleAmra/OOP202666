@@ -92,7 +92,7 @@
         "patrolPoints": []
       }
     },
-        {
+    {
       "id": 106,
       "texture": "Student1",
       "visualOffsetY": -8.0,
@@ -129,6 +129,24 @@
           { "x": 18, "y": 15 },
           { "x": 18, "y": 19 }
         ]
+      }
+    },
+    {
+      "id": 107,
+      "texture": "Security1",
+      "visualOffsetY": -8.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "dialogueFile": "roadblock_guard.txt",
+      "action": "NONE",
+      "actionData": "",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "roadblock_cleared",
+      "movement": {
+        "type": "STILL",
+        "moveInterval": 2.0,
+        "wanderRadius": 0,
+        "patrolPoints": []
       }
     }
   ]

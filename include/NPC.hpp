@@ -97,6 +97,7 @@ public:
     void SetInteractFlag(const std::string& flag) { m_InteractFlag = flag; }
     const std::string& GetInteractFlag() const { return m_InteractFlag; }
     std::string m_InteractFlag;
+    bool IsActive() const;
 protected:
     void LoadSprites() override;
 

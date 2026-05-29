@@ -98,6 +98,13 @@ public:
     void LoadGeneratedLevel(const std::string& mapName,
                             std::vector<std::vector<int>> groundData,
                             std::vector<std::vector<int>> propData);
+
+    void SetPlayerGridPosition(int x, int y) {
+    m_PlayerGridX = x;
+    m_PlayerGridY = y;
+    }
+    void SetPaused(bool paused) { m_Paused = paused; }
+    bool IsPaused()       const { return m_Paused; }
     
 private:
     // --- MAP DATA ---
@@ -110,6 +117,11 @@ private:
     std::string m_CurrentLevelPath;
     std::weak_ptr<Util::Renderer> m_Renderer;
 
+
+    //
+    int  m_PlayerGridX = -1;
+    int  m_PlayerGridY = -1;
+    bool m_Paused      = false;
     // --- THE REGISTRY ---
     std::unordered_map<int, TileProperties> m_TileRegistry;
     std::unordered_map<int, NPCProperties> m_NPCRegistry;

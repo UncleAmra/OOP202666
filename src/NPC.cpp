@@ -49,33 +49,29 @@ bool NPC::IsActive() const {
 // ============================================================
 glm::vec2 NPC::Update(std::shared_ptr<Map> map) {
     if (!IsActive()) {
-        SetVisible(false); // <-- THIS hides the NPC from the Renderer!
-        return glm::vec2(0.0f, 0.0f); // Vanished NPCs don't move or think
+        SetVisible(false);
+        return glm::vec2(0.0f, 0.0f);
     }
-    
-    // Safety fallback: if a flag gets reversed, make sure they reappear
-    SetVisible(true); 
+    SetVisible(true);
 
-    // Always finish any in-progress tile movement first.
+    // 1. ALWAYS process on‑going tile movement, and only that.
     if (m_IsMoving) {
-        glm::vec2 movement = Character::Update(map);
+        glm::vec2 movement = Character::Update(map);   // advance the interpolation
+        m_Transform.translation += movement;           // actually move the sprite
+        return movement;                               // no decisions until the step finishes
     }
-    // Freeze decisions during dialogue — the NPC finishes its current step
-    // then holds still until SetLocked(false) is called.
-    /*if (m_Locked) {
-        return Character::Update(map);
-    }
-    */
 
-    // Tick the decision timer.
+    // 2. Tick decision timer ONLY when idle.
     float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;
     m_MoveTimer -= dt;
-
     if (m_MoveTimer > 0.0f) {
-        return Character::Update(map);
+        // Idle frame – still call Update for animation (will return 0,0 but keeps sprite alive).
+        glm::vec2 movement = Character::Update(map);
+        m_Transform.translation += movement;   // usually zero, but harmless
+        return movement;
     }
 
-    // Timer expired — make a movement decision.
+    // 3. Timer expired → make a movement decision.
     switch (m_MovementType) {
         case MovementType::LOOK_AROUND: DoLookAround(); break;
         case MovementType::WANDER:      DoWander(map);  break;
@@ -83,11 +79,11 @@ glm::vec2 NPC::Update(std::shared_ptr<Map> map) {
         case MovementType::STILL:       break;
     }
 
-    // Reset timer with jitter so NPCs feel organic, not mechanical.
+    // 4. Reset timer (with jitter).
     float jitter = (rand() % 100) / 100.0f * m_MoveInterval * 0.4f;
     m_MoveTimer = m_MoveInterval + jitter;
 
-    // Apply any movement started this frame (e.g. first step of a wander).
+    // 5. Apply the very first frame of the new movement (started by TryMoveInDirection).
     glm::vec2 movement = Character::Update(map);
     m_Transform.translation += movement;
     return movement;
@@ -110,32 +106,13 @@ void NPC::FaceToward(int playerGridX, int playerGridY) {
 // Inside src/NPC.cpp
 
 std::vector<std::string> NPC::Interact(const Character& player) {
-    
-    // 1. If the flag is already true, this roadblock is cleared forever.
+    // 1. Flag already set — roadblock permanently cleared, show alt dialogue
     if (!m_FlagCondition.empty() && GameFlags::Get(m_FlagCondition)) {
-        m_ActionType = NPCAction::NONE;
         return m_AltDialogueLines.empty() ? m_DialogueLines : m_AltDialogueLines;
     }
 
-    // 2. Check if this NPC is actively waiting for an item (like the Student Card)
-    if (m_ActionType == NPCAction::CHECK_ITEM) {
-        
-        // m_ActionData holds the item name string (e.g., "Student Card")
-        // Use the player's GetItemCount function directly!
-        if (player.GetItemCount(m_ActionData) > 0) {
-            
-            // Success! Flip the GameFlag so the NPC vanishes/deactivates next frame
-            GameFlags::Set(m_FlagCondition, true);
-            m_ActionType = NPCAction::NONE; 
-            
-            return m_AltDialogueLines; // "Ah, you have the Student Card! Pass on through."
-        } else {
-            // Missing the item
-            return m_DialogueLines;    // "This way is closed unless you have a Student Card."
-        }
-    }
-
-    // 3. Fallback for standard NPCs
+    // 2. Return the appropriate opening dialogue — action is resolved
+    //    by ProcessDialogueState after the player reads through it
     return m_DialogueLines;
 }
 

@@ -749,6 +749,51 @@
       "offsetY": 0.0,
       "animMode": "STATIC",
       "frameDelay": 8
+    },
+        {
+      "id": 55,
+      "textures": ["ClassTable.png"],
+      "zIndex": 0.7,
+      "dynamicZ": true,
+      "walkable": false,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "animMode": "STATIC",
+      "frameDelay": 8
+    },
+        {
+      "id": 56,
+      "textures": ["Computer.png"],
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "walkable": false,
+      "offsetX": 0.0,
+      "offsetY": 16.0,
+      "animMode": "STATIC",
+      "frameDelay": 8
+    },
+    
+        {
+      "id": 57,
+      "textures": ["ComputerChairFront.png"],
+      "zIndex": 0.7,
+      "dynamicZ": true,
+      "walkable": false,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "animMode": "STATIC",
+      "frameDelay": 8
+    },
+        {
+      "id": 58,
+      "textures": ["ComputerChairBack.png"],
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "walkable": false,
+      "offsetX": 0.0,
+      "offsetY": 0.0,
+      "animMode": "STATIC",
+      "frameDelay": 8
     }
 ]
 }

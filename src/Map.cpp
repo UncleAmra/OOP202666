@@ -50,13 +50,13 @@ ItemCategory Map::StringToCategory(const std::string& s) {
         LOG_WARN("NPCRegistry: unknown itemCategory '{}', defaulting to GENERAL", s);
     return ItemCategory::GENERAL;
 }
-
 NPCAction Map::StringToAction(const std::string& s) {
+    LOG_INFO("StringToAction: '{}' len={}", s, s.size());
     if (s == "HEAL")       return NPCAction::HEAL;
     if (s == "SHOP")       return NPCAction::SHOP;
     if (s == "GIVE_ITEM")  return NPCAction::GIVE_ITEM;
     if (s == "BATTLE")     return NPCAction::BATTLE;
-    if (s == "CHECK_ITEM") return NPCAction::CHECK_ITEM; 
+    if (s == "CHECK_ITEM") return NPCAction::CHECK_ITEM;
     if (s != "NONE" && !s.empty())
         LOG_WARN("NPCRegistry: unknown action '{}', defaulting to NONE", s);
     return NPCAction::NONE;
@@ -375,8 +375,9 @@ void Map::SpawnTilesAndProps() {
                 npc->SetZIndex(npcProps.zIndex);
                 npc->SetBaseZIndex(npcProps.zIndex);
                 npc->SetDynamicZ(npcProps.dynamicZ);
-                npc->SetAction(npcProps.actionType, npcProps.actionData, npcProps.itemCategory);
-                if (npcProps.actionType == NPCAction::BATTLE) {
+                LOG_INFO("Spawning NPC id={} action={} data='{}'",
+                        propID, (int)npcProps.actionType, npcProps.actionData);
+                npc->SetAction(npcProps.actionType, npcProps.actionData, npcProps.itemCategory);                if (npcProps.actionType == NPCAction::BATTLE) {
                     auto loadedParty = TrainerDatabase::CreateTrainerParty(npcProps.actionData);
                     for (const auto& p : loadedParty) npc->GetParty().push_back(p);
                 }
@@ -451,45 +452,49 @@ void Map::LoadLevel(const std::string& mapName) {
 }
 
 void Map::Update() {
+    // Water sync — always runs, pause doesn't affect it.
+    // Stopping mid-ripple during dialogue would look wrong.
     if (m_LeaderWater && m_FollowerWater) {
         m_FollowerWater->SetCurrentFrame(m_LeaderWater->GetCurrentFrameIndex());
     }
-
+ 
+    // Tile culling — pure bookkeeping, no visible gameplay effect.
     if (!m_Tiles.empty()) {
         const float margin = GameConfig::EFFECTIVE_TILE_SIZE * 2.0f;
-        const float minX = -(HALF_W + margin);
-        const float maxX =  (HALF_W + margin);
-        const float minY = -(HALF_H + margin);
-        const float maxY =  (HALF_H + margin);
-
+        const float minX = -(HALF_W + margin), maxX = (HALF_W + margin);
+        const float minY = -(HALF_H + margin), maxY = (HALF_H + margin);
+ 
         for (size_t i = 0; i < m_Tiles.size(); i++) {
             float tx = m_Tiles[i]->m_Transform.translation.x;
             float ty = m_Tiles[i]->m_Transform.translation.y;
             bool inView = tx > minX && tx < maxX && ty > minY && ty < maxY;
-
             if (inView != m_TileVisible[i]) {
                 m_TileVisible[i] = inView;
                 m_Tiles[i]->SetVisible(inView);
             }
         }
     }
-
+ 
+    // Prop culling — visibility always updates, but animation pauses
+    // during dialogue so spinning signs don't advance mid-conversation.
     const float propMargin = GameConfig::EFFECTIVE_TILE_SIZE * 6.0f;
-    const float propMinX   = -(HALF_W + propMargin);
-    const float propMaxX   =  (HALF_W + propMargin);
-    const float propMinY   = -(HALF_H + propMargin);
-    const float propMaxY   =  (HALF_H + propMargin);
-
+    const float propMinX = -(HALF_W + propMargin), propMaxX = (HALF_W + propMargin);
+    const float propMinY = -(HALF_H + propMargin), propMaxY = (HALF_H + propMargin);
+ 
     for (auto& prop : m_Props) {
         float px = prop->m_Transform.translation.x;
         float py = prop->m_Transform.translation.y;
-        bool inView = px > propMinX && px < propMaxX && py > propMinY && py < propMaxY;
-
+        bool inView = px > propMinX && px < propMaxX &&
+                      py > propMinY && py < propMaxY;
         prop->SetVisible(inView);
-        if (inView) prop->Update();
+        if (inView && !m_Paused) prop->Update();
     }
-
-    for (auto& npc : m_NPCs) npc->Update(shared_from_this());
+ 
+    // NPCs freeze entirely during dialogue — no movement decisions,
+    // no animation advancement, no Z-sort updates.
+    if (!m_Paused) {
+        for (auto& npc : m_NPCs) npc->Update(shared_from_this());
+    }
 }
 
 void Map::Move(float dx, float dy) {
@@ -506,11 +511,14 @@ void Map::WarpTo(int gridX, int gridY) {
 }
 
 bool Map::IsWalkable(int x, int y) {
-    if (x < 0 || x >= (int)m_LevelData[0].size() || y < 0 || y >= (int)m_LevelData.size()) {
+    // 1. Bounds
+    if (x < 0 || x >= (int)m_LevelData[0].size() ||
+        y < 0 || y >= (int)m_LevelData.size()) {
         printf("WALK FAILED: Tile (%d, %d) is out of bounds!\n", x, y);
         return false;
     }
-
+ 
+    // 2. Ground tile
     int tileID = m_LevelData[y][x];
     if (m_TileRegistry.count(tileID) == 0) {
         printf("WALK FAILED: Ground Tile ID %d is missing from registry!\n", tileID);
@@ -520,7 +528,8 @@ bool Map::IsWalkable(int x, int y) {
         printf("WALK FAILED: Ground Tile ID %d is marked as solid!\n", tileID);
         return false;
     }
-
+ 
+    // 3. Props and items
     int propID = m_PropData[y][x];
     if (m_PropRegistry.count(propID) > 0 && !m_PropRegistry[propID].isWalkable) {
         printf("WALK FAILED: Blocked by solid Prop ID %d!\n", propID);
@@ -530,7 +539,9 @@ bool Map::IsWalkable(int x, int y) {
         printf("WALK FAILED: Blocked by unpicked Item ID %d!\n", propID);
         return false;
     }
-
+ 
+    // 4. Active NPCs — inactive NPCs (defeated trainers, hidden by flag)
+    //    are skipped so the player and other NPCs can pass through them.
     for (const auto& npc : m_NPCs) {
         if (!npc->IsActive()) continue;
         if (npc->GetGridX() == x && npc->GetGridY() == y) {
@@ -538,6 +549,14 @@ bool Map::IsWalkable(int x, int y) {
             return false;
         }
     }
+ 
+    // 5. Player tile — NPCs cannot walk through the player.
+    //    Sentinel -1,-1 is never a valid tile so this is a no-op until
+    //    SetPlayerGridPosition() has been called at least once.
+    if (m_PlayerGridX == x && m_PlayerGridY == y) {
+        return false;
+    }
+ 
     return true;
 }
 

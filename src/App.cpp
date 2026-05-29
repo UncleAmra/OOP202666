@@ -180,62 +180,97 @@ void App::PerformQuickSave() {
 void App::ProcessDialogueState() {
     if (!Util::Input::IsKeyDown(Util::Keycode::Z)) return;
 
-    if (!m_CurrentDialogueLines.empty() && m_CurrentDialogueIndex < m_CurrentDialogueLines.size() - 1) {
+    // ── Still more lines to show ─────────────────────────────────────────────
+    if (!m_CurrentDialogueLines.empty() &&
+        m_CurrentDialogueIndex < m_CurrentDialogueLines.size() - 1) {
+
         m_CurrentDialogueIndex++;
         m_DialogueText->SetText(m_CurrentDialogueLines[m_CurrentDialogueIndex]);
-        
+
         float textHalfWidth = m_DialogueText->GetSize().x / 2.0f;
-        m_DialogueUI->m_Transform.translation.x = -600.0f + textHalfWidth; 
-    } 
-    else {
-        // Dialogue has finished running through all sentences!
-        m_DialogueBoxUI->SetVisible(false);
-        m_DialogueUI->SetVisible(false);
+        m_DialogueUI->m_Transform.translation.x = -600.0f + textHalfWidth;
+        return;
+    }
 
-        if (m_ActiveNPC) {
-            // Method 1 implementation: Check and apply roadblock/clear flags instantly
-            std::string clearFlag = m_ActiveNPC->GetInteractFlag();
-            if (!clearFlag.empty()) {
-                GameFlags::Set(clearFlag, true);
-                LOG_INFO("Roadblock system: Event Flag '{}' has been set to TRUE.", clearFlag);
-            }
+    // ── Last line confirmed — close dialogue UI ──────────────────────────────
+    m_DialogueBoxUI->SetVisible(false);
+    m_DialogueUI->SetVisible(false);
+    m_Map->SetPaused(false);
 
-            NPCAction action = m_ActiveNPC->GetActionType();
-            std::string data = m_ActiveNPC->GetActionData();
+    if (!m_ActiveNPC) {
+        // Sign or ground item — no action to process
+        m_CurrentState = State::UPDATE;
+        return;
+    }
 
-            if (action == NPCAction::SHOP) {
-                m_CurrentState = State::UPDATE; 
+    // Unpack NPC data before we clear the pointer
+    const NPCAction action = m_ActiveNPC->GetActionType();
+    const std::string data = m_ActiveNPC->GetActionData();
+    const std::string flag = m_ActiveNPC->GetInteractFlag();
+    const ItemCategory category = m_ActiveNPC->GetActionCategory();
+    auto               npcParty = m_ActiveNPC->GetParty();
+
+    m_ActiveNPC->SetLocked(false);
+    m_ActiveNPC = nullptr;
+
+    // ── Action dispatch ──────────────────────────────────────────────────────
+    switch (action) {
+
+        case NPCAction::HEAL: {
+            for (auto& pokemon : m_Character->GetParty()) {
+                if (pokemon) pokemon->SetCurrentHP(pokemon->GetMaxHP());
             }
-            else if (action == NPCAction::HEAL) {
-                auto party = m_Character->GetParty();
-                for (auto& pokemon : party) {
-                    if (pokemon) {
-                        pokemon->SetCurrentHP(pokemon->GetMaxHP());
-                    }
-                }
-                m_CurrentState = State::UPDATE;
-            }
-            else if (action == NPCAction::BATTLE) {
-                m_Character->SetVisible(false);
-                m_Map->SetVisible(false);
-                m_BattleUI->StartTrainerBattle(m_Character->GetParty(), m_ActiveNPC->GetParty());
-                m_CurrentState = State::BATTLE;
-            }
-            else if (action == NPCAction::GIVE_ITEM) {
-                if (!data.empty()) {
-                    ItemCategory category = m_ActiveNPC->GetActionCategory();
-                    m_Character->AddItem(data, category, 1);
-                    LOG_INFO("Player received: {} (qty: 1)", data);
-                }
-                m_CurrentState = State::UPDATE;
-            }
-            else {
-                m_CurrentState = State::UPDATE;
-            }
-            m_ActiveNPC = nullptr;
-        } 
-        else {
+            if (!flag.empty()) GameFlags::Set(flag, true);
             m_CurrentState = State::UPDATE;
+            break;
+        }
+
+        case NPCAction::SHOP: {
+            // if (!flag.empty()) GameFlags::Set(flag, true);
+            // m_ShopUI->Show(data);
+            // m_CurrentState = State::SHOP;
+            m_CurrentState = State::UPDATE;
+            break;
+        }
+
+        case NPCAction::GIVE_ITEM: {
+            if (!data.empty()) {
+                m_Character->AddItem(data, category, 1);
+                LOG_INFO("Player received: {} (qty: 1)", data);
+            }
+            if (!flag.empty()) GameFlags::Set(flag, true);
+            m_CurrentState = State::UPDATE;
+            break;
+        }
+
+        case NPCAction::BATTLE: {
+            m_Character->SetVisible(false);
+            m_Map->SetVisible(false);
+            m_BattleUI->StartTrainerBattle(m_Character->GetParty(), npcParty);
+
+            if (!flag.empty()) GameFlags::Set(flag, true);
+            m_CurrentState = State::BATTLE;
+            break;
+        }
+
+        case NPCAction::CHECK_ITEM: {
+            if (!data.empty() && m_Character->GetItemCount(data) > 0) {
+                if (!flag.empty()) {
+                    GameFlags::Set(flag, true);
+                    LOG_INFO("CHECK_ITEM passed: '{}' found, flag '{}' set.", data, flag);
+                }
+            } else {
+                LOG_INFO("CHECK_ITEM failed: player does not have '{}'.", data);
+            }
+            m_CurrentState = State::UPDATE;
+            break;
+        }
+
+        case NPCAction::NONE:
+        default: {
+            // Ambient NPC or sign — no flag, no side effect
+            m_CurrentState = State::UPDATE;
+            break;
         }
     }
 }

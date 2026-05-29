@@ -7,7 +7,7 @@
 
 namespace GameConfig {
     constexpr float TILE_SIZE   = 16.0f;
-    constexpr float SCALE       = 4.0f;
+    constexpr float SCALE       = 2.0f;
     constexpr float SCALED_TILE_SIZE    = TILE_SIZE * SCALE; // 48.0f
     constexpr float EFFECTIVE_TILE_SIZE = SCALED_TILE_SIZE - 0.1f; 
 
@@ -42,6 +42,7 @@ namespace GameConfig {
     constexpr int TILE_WALLSTONE7   = 80;
     constexpr int TILE_WALLSTONE8   = 81;
     constexpr int TILE_ELEVATOR_FLOOR  = 82;
+    constexpr int TILE_DECK         = 83;
 
 
     // Prop IDs 
@@ -120,8 +121,9 @@ namespace GameConfig {
     constexpr int MOSS_GENWORLDBUILDING     = 565;
     constexpr int GEN_BUILDING1             = 566;
     constexpr int GEN_BUILDING2             = 567;
+    constexpr int CITY_BUILD1               = 568;
 
-    //
+     //
 
 
     // Item IDs

@@ -2,6 +2,7 @@
 #define NPC_HPP
 
 #include "Character.hpp"
+#include "Player.hpp"
 #include "Item.hpp"
 #include <string>
 #include <vector>
@@ -15,7 +16,8 @@ enum class NPCAction {
     HEAL,       // Restores the player's entire party
     SHOP,       // Opens the Pokemart UI
     GIVE_ITEM,  // Adds one item to the player's bag
-    BATTLE      // Starts a trainer battle
+    BATTLE,      // Starts a trainer battle
+    CHECK_ITEM
 };
 
 // ============================================================
@@ -49,8 +51,8 @@ public:
     // --------------------------------------------------------
     // Returns the correct dialogue lines and suppresses re-triggering
     // actions via m_FlagCondition. Call FaceToward() before this.
-    std::vector<std::string> Interact();
-
+    //std::vector<std::string> Interact();
+    std::vector<std::string> Interact(const Character& player);
     // Snaps the NPC to face the player tile before dialogue opens.
     // Call this from the game loop immediately before showing dialogue.
     void FaceToward(int playerGridX, int playerGridY);

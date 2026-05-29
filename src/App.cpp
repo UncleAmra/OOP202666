@@ -364,27 +364,31 @@ void App::HandleOverworldInteraction(int checkX, int checkY) {
     }
 
     if (targetNPC) {
-        m_ActiveNPC = targetNPC;
-        m_Character->StopMoving();
-        m_CurrentState = State::DIALOGUE; 
-        m_DialogueBoxUI->SetVisible(true);
-        m_DialogueUI->SetVisible(true);
+    m_ActiveNPC = targetNPC;
+    m_Character->StopMoving();
+    m_CurrentState = State::DIALOGUE; 
+    m_DialogueBoxUI->SetVisible(true);
+    m_DialogueUI->SetVisible(true);
 
-        Character::Direction playerDir = m_Character->GetFacingDirection();
-        if (playerDir == Character::Direction::UP)         targetNPC->SetDirection(Character::Direction::DOWN);
-        else if (playerDir == Character::Direction::DOWN)  targetNPC->SetDirection(Character::Direction::UP);
-        else if (playerDir == Character::Direction::LEFT)  targetNPC->SetDirection(Character::Direction::RIGHT);
-        else if (playerDir == Character::Direction::RIGHT) targetNPC->SetDirection(Character::Direction::LEFT);
+    Character::Direction playerDir = m_Character->GetFacingDirection();
+    if (playerDir == Character::Direction::UP)         targetNPC->SetDirection(Character::Direction::DOWN);
+    else if (playerDir == Character::Direction::DOWN)  targetNPC->SetDirection(Character::Direction::UP);
+    else if (playerDir == Character::Direction::LEFT)  targetNPC->SetDirection(Character::Direction::RIGHT);
+    else if (playerDir == Character::Direction::RIGHT) targetNPC->SetDirection(Character::Direction::LEFT);
 
-        m_CurrentDialogueLines = targetNPC->Interact();
-        m_CurrentDialogueIndex = 0; 
+    // ─── UPDATE THIS LINE ───────────────────────────────────────────
+    // Dereference m_Character so the NPC can read the player's inventory
+    m_CurrentDialogueLines = targetNPC->Interact(*m_Character);
+    // ────────────────────────────────────────────────────────────────
+    
+    m_CurrentDialogueIndex = 0; 
 
-        if (!m_CurrentDialogueLines.empty()) {
-            m_DialogueText->SetText(m_CurrentDialogueLines[m_CurrentDialogueIndex]);
-            float textHalfWidth = m_DialogueText->GetSize().x / 2.0f;
-            m_DialogueUI->m_Transform.translation.x = -600.0f + textHalfWidth;
-        }
+    if (!m_CurrentDialogueLines.empty()) {
+        m_DialogueText->SetText(m_CurrentDialogueLines[m_CurrentDialogueIndex]);
+        float textHalfWidth = m_DialogueText->GetSize().x / 2.0f;
+        m_DialogueUI->m_Transform.translation.x = -600.0f + textHalfWidth;
     }
+}
     else {
         std::string collectedItem = m_Map->CollectItemAt(checkX, checkY, *m_Character);
         if (!collectedItem.empty()) {

@@ -107,16 +107,35 @@ void NPC::FaceToward(int playerGridX, int playerGridY) {
     }
 }
 
-std::vector<std::string> NPC::Interact() {
-    if (!m_FlagCondition.empty()) {
-        // TODO: wire in your save-data flag system here.
-        //
-        // if (SaveData::GetFlag(m_FlagCondition)) {
-        //     m_ActionType = NPCAction::NONE;
-        //     return m_AltDialogueLines.empty() ? m_DialogueLines : m_AltDialogueLines;
-        // }
-        // SaveData::SetFlag(m_FlagCondition, true);
+// Inside src/NPC.cpp
+
+std::vector<std::string> NPC::Interact(const Character& player) {
+    
+    // 1. If the flag is already true, this roadblock is cleared forever.
+    if (!m_FlagCondition.empty() && GameFlags::Get(m_FlagCondition)) {
+        m_ActionType = NPCAction::NONE;
+        return m_AltDialogueLines.empty() ? m_DialogueLines : m_AltDialogueLines;
     }
+
+    // 2. Check if this NPC is actively waiting for an item (like the Student Card)
+    if (m_ActionType == NPCAction::CHECK_ITEM) {
+        
+        // m_ActionData holds the item name string (e.g., "Student Card")
+        // Use the player's GetItemCount function directly!
+        if (player.GetItemCount(m_ActionData) > 0) {
+            
+            // Success! Flip the GameFlag so the NPC vanishes/deactivates next frame
+            GameFlags::Set(m_FlagCondition, true);
+            m_ActionType = NPCAction::NONE; 
+            
+            return m_AltDialogueLines; // "Ah, you have the Student Card! Pass on through."
+        } else {
+            // Missing the item
+            return m_DialogueLines;    // "This way is closed unless you have a Student Card."
+        }
+    }
+
+    // 3. Fallback for standard NPCs
     return m_DialogueLines;
 }
 

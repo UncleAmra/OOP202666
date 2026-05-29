@@ -46,8 +46,8 @@
       "dynamicZ": true,
       "dialogueFile": "shopkeeper.txt",
       "action": "GIVE_ITEM",
-      "actionData": "potion",
-      "itemCategory": "GENERAL",
+      "actionData": "Student Card",
+      "itemCategory": "KEY_ITEMS",
       "flagOnInteract": "",
       "movement": {
         "type": "STILL",
@@ -138,9 +138,9 @@
       "zIndex": 0.8,
       "dynamicZ": true,
       "dialogueFile": "roadblock_guard.txt",
-      "action": "NONE",
-      "actionData": "",
-      "itemCategory": "GENERAL",
+      "action": "CHECK_ITEM",
+      "actionData": "Student Card",
+      "itemCategory": "KEY_ITEMS",
       "flagOnInteract": "roadblock_cleared",
       "movement": {
         "type": "STILL",

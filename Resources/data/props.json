@@ -753,10 +753,10 @@
         {
       "id": 55,
       "textures": ["ClassTable.png"],
-      "zIndex": 0.7,
+      "zIndex": 0.8,
       "dynamicZ": true,
       "walkable": false,
-      "offsetX": 0.0,
+      "offsetX": -32.0,
       "offsetY": 0.0,
       "animMode": "STATIC",
       "frameDelay": 8
@@ -764,7 +764,7 @@
         {
       "id": 56,
       "textures": ["Computer.png"],
-      "zIndex": 0.8,
+      "zIndex": 0.85,
       "dynamicZ": true,
       "walkable": false,
       "offsetX": 0.0,
@@ -776,7 +776,7 @@
         {
       "id": 57,
       "textures": ["ComputerChairFront.png"],
-      "zIndex": 0.7,
+      "zIndex": 0.8,
       "dynamicZ": true,
       "walkable": false,
       "offsetX": 0.0,
@@ -792,6 +792,28 @@
       "walkable": false,
       "offsetX": 0.0,
       "offsetY": 0.0,
+      "animMode": "STATIC",
+      "frameDelay": 8
+    },
+    {
+      "id": 59,
+      "textures": ["ClassComputer.png"],
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "walkable": false,
+      "offsetX": 0.0,
+      "offsetY": 8.0,
+      "animMode": "STATIC",
+      "frameDelay": 8
+    },
+    {
+      "id": 69,
+      "textures": ["ClassWall.png"],
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "walkable": true,
+      "offsetX": 24.0,
+      "offsetY": 68.0,
       "animMode": "STATIC",
       "frameDelay": 8
     }

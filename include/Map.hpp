@@ -45,24 +45,26 @@ struct PatrolPoint {
     int gridY;
 };
 
+
 struct NPCProperties {
     std::string  texturePath;
     float        visualOffsetY;
     float        zIndex;
     bool         dynamicZ;
-    std::string  dialogueFilePath;
-    NPCAction    actionType     = NPCAction::NONE;
-    std::string  actionData     = "";
-    ItemCategory itemCategory   = ItemCategory::GENERAL;
+    NPCAction    actionType   = NPCAction::NONE;
+    std::string  actionData   = "";
+    ItemCategory itemCategory = ItemCategory::GENERAL;
+    std::string  flagOnInteract;
+    std::string  flagToHide;
 
-    MovementType             movementType  = MovementType::STILL;
-    float                    moveInterval  = 2.0f;
-    int                      wanderRadius  = 3;
-    std::vector<PatrolPoint> patrolPoints  = {};
-    std::string              flagOnInteract;
-    
-    // ROADBLOCKS / CONDITIONAL HIDING
-    std::string flagToHide = ""; // If this flag is true, NPC vanishes & unblocks path
+    MovementType             movementType = MovementType::STILL;
+    float                    moveInterval = 2.0f;
+    int                      wanderRadius = 3;
+    std::vector<PatrolPoint> patrolPoints = {};
+
+    // Dialogue — default first, then flag-conditional entries in priority order
+    std::vector<std::string>      defaultDialogue;
+    std::vector<NPCDialogueEntry> conditionalDialogue;
 };
 
 struct ItemProperties {

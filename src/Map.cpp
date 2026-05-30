@@ -221,19 +221,19 @@ void Map::LoadNPCsFromJSON(const std::string& path) {
         LOG_ERROR("NPCRegistry: could not open '{}'", path);
         return;
     }
- 
+
     json root;
-    try { file >> root; } 
+    try { file >> root; }
     catch (const json::parse_error& e) {
         LOG_ERROR("NPCRegistry: JSON parse error in '{}': {}", path, e.what());
         return;
     }
- 
+
     if (!root.contains("npcs") || !root["npcs"].is_array()) {
         LOG_ERROR("NPCRegistry: '{}' is missing a top-level \"npcs\" array", path);
         return;
     }
- 
+
     int loaded = 0;
     for (const auto& entry : root["npcs"]) {
         if (!entry.contains("id")) {
@@ -242,32 +242,65 @@ void Map::LoadNPCsFromJSON(const std::string& path) {
         }
         const int id = entry["id"].get<int>();
         NPCProperties props;
-        props.texturePath      = NPC_DIR      + entry.value("texture",     "");
-        props.dialogueFilePath = DIALOGUE_DIR + entry.value("dialogueFile","");
-        props.visualOffsetY    = entry.value("visualOffsetY", 0.0f);
-        props.zIndex           = entry.value("zIndex",        0.5f);
-        props.dynamicZ         = entry.value("dynamicZ",      true);
-        props.actionType       = StringToAction  (entry.value("action",       "NONE"));
-        props.actionData       = entry.value("actionData",    "");
-        props.itemCategory     = StringToCategory(entry.value("itemCategory", "GENERAL"));
-        props.flagOnInteract   = entry.value("flagOnInteract","");
-        props.flagToHide       = entry.value("flagToHide",    "");   
 
+        props.texturePath    = NPC_DIR + entry.value("texture",      "");
+        props.visualOffsetY  = entry.value("visualOffsetY", 0.0f);
+        props.zIndex         = entry.value("zIndex",        0.5f);
+        props.dynamicZ       = entry.value("dynamicZ",      true);
+        props.actionType     = StringToAction  (entry.value("action",       "NONE"));
+        props.actionData     = entry.value("actionData",    "");
+        props.itemCategory   = StringToCategory(entry.value("itemCategory", "GENERAL"));
+        props.flagOnInteract = entry.value("flagOnInteract","");
+        props.flagToHide     = entry.value("flagToHide",    "");
+
+        // ── Dialogue ────────────────────────────────────────────────────────
+        if (entry.contains("dialogue") && entry["dialogue"].is_object()) {
+            const auto& d = entry["dialogue"];
+
+            // Default lines — shown when no flag condition is met
+            if (d.contains("default") && d["default"].is_array())
+                for (const auto& line : d["default"])
+                    props.defaultDialogue.push_back(line.get<std::string>());
+
+            // Flag-conditional lines — checked top-to-bottom, first match wins
+            if (d.contains("flags") && d["flags"].is_array()) {
+                for (const auto& flag : d["flags"]) {
+                    if (!flag.contains("condition") || !flag.contains("lines")) {
+                        LOG_WARN("NPCRegistry: NPC id={} dialogue flag entry missing "
+                                 "\"condition\" or \"lines\", skipping", id);
+                        continue;
+                    }
+                    NPCDialogueEntry e;
+                    e.condition = flag["condition"].get<std::string>();
+                    for (const auto& line : flag["lines"])
+                        e.lines.push_back(line.get<std::string>());
+                    props.conditionalDialogue.push_back(std::move(e));
+                }
+            }
+        } else {
+            LOG_WARN("NPCRegistry: NPC id={} has no \"dialogue\" block — "
+                     "will be silent on interaction", id);
+        }
+
+        // ── Movement ────────────────────────────────────────────────────────
         if (entry.contains("movement") && entry["movement"].is_object()) {
-            const auto& mov    = entry["movement"];
+            const auto& mov = entry["movement"];
             props.movementType = StringToMovement(mov.value("type",         "STILL"));
             props.moveInterval = mov.value("moveInterval", 2.0f);
             props.wanderRadius = mov.value("wanderRadius", 3);
+
             if (mov.contains("patrolPoints") && mov["patrolPoints"].is_array()) {
                 for (const auto& pt : mov["patrolPoints"]) {
                     if (!pt.contains("x") || !pt.contains("y")) {
-                        LOG_WARN("NPCRegistry: NPC id={} patrol point missing x or y, skipping point", id);
+                        LOG_WARN("NPCRegistry: NPC id={} patrol point missing x or y, "
+                                 "skipping point", id);
                         continue;
                     }
                     props.patrolPoints.push_back({ pt["x"].get<int>(), pt["y"].get<int>() });
                 }
             }
         }
+
         m_NPCRegistry[id] = std::move(props);
         ++loaded;
     }
@@ -364,33 +397,45 @@ void Map::SpawnTilesAndProps() {
             float worldX = GameConfig::CAMERA_START_X + (x * GameConfig::EFFECTIVE_TILE_SIZE);
             float worldY = GameConfig::CAMERA_START_Y - (y * GameConfig::EFFECTIVE_TILE_SIZE);
 
+            // Inside SpawnTilesAndProps — NPC spawn block (replaces the existing one)
             if (m_NPCRegistry.count(propID) > 0) {
                 const NPCProperties& npcProps = m_NPCRegistry[propID];
+
                 auto npc = std::make_shared<NPC>(
                     worldX, worldY + npcProps.visualOffsetY * GameConfig::SCALE / 3.0f,
-                    npcProps.texturePath, npcProps.dialogueFilePath, "", ""
+                    npcProps.texturePath
                 );
+
                 npc->SetGridPosition(x, y);
                 npc->SetSpawnPoint(x, y);
                 npc->SetZIndex(npcProps.zIndex);
                 npc->SetBaseZIndex(npcProps.zIndex);
                 npc->SetDynamicZ(npcProps.dynamicZ);
-                LOG_INFO("Spawning NPC id={} action={} data='{}'",
-                        propID, (int)npcProps.actionType, npcProps.actionData);
-                npc->SetAction(npcProps.actionType, npcProps.actionData, npcProps.itemCategory);                if (npcProps.actionType == NPCAction::BATTLE) {
+
+                // Inline dialogue — no file paths, data comes straight from the registry
+                npc->SetDialogue(npcProps.defaultDialogue, npcProps.conditionalDialogue);
+
+                npc->SetAction(npcProps.actionType, npcProps.actionData, npcProps.itemCategory);
+                if (npcProps.actionType == NPCAction::BATTLE) {
                     auto loadedParty = TrainerDatabase::CreateTrainerParty(npcProps.actionData);
                     for (const auto& p : loadedParty) npc->GetParty().push_back(p);
                 }
+
                 npc->SetMovementType(npcProps.movementType);
                 npc->SetMoveInterval(npcProps.moveInterval);
                 npc->SetWanderRadius(npcProps.wanderRadius);
                 for (const auto& point : npcProps.patrolPoints)
                     npc->AddPatrolPoint(point.gridX, point.gridY);
+
                 npc->SetInteractFlag(npcProps.flagOnInteract);
                 if (!npcProps.flagToHide.empty()) {
                     npc->SetFlagToHide(npcProps.flagToHide);
                     npc->SetVisible(!GameFlags::Get(npcProps.flagToHide));
                 }
+
+                LOG_INFO("Spawning NPC id={} action={} data='{}'",
+                        propID, (int)npcProps.actionType, npcProps.actionData);
+
                 m_NPCs.push_back(npc);
                 AddToRenderer(npc);
             }

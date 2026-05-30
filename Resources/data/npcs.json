@@ -8,7 +8,6 @@
       "visualOffsetY": 12.0,
       "zIndex": 0.2,
       "dynamicZ": false,
-      "dialogueFile": "nurse.txt",
       "action": "HEAL",
       "actionData": "",
       "itemCategory": "GENERAL",
@@ -18,15 +17,21 @@
         "moveInterval": 2.0,
         "wanderRadius": 3,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Welcome to the Pokemon Center!",
+          "Shall I restore your Pokemon to full health?"
+        ],
+        "flags": []
       }
     },
     {
-      "id": 101,
+      "id": 102,
       "texture": "ShopKeeper",
       "visualOffsetY": -12.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "shopkeeper.txt",
       "action": "SHOP",
       "actionData": "Mart_Potions",
       "itemCategory": "GENERAL",
@@ -36,6 +41,13 @@
         "moveInterval": 2.0,
         "wanderRadius": 3,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Hi there! Looking to stock up?",
+          "I've got just what you need!"
+        ],
+        "flags": []
       }
     },
     {
@@ -44,7 +56,6 @@
       "visualOffsetY": -12.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "shopkeeper.txt",
       "action": "GIVE_ITEM",
       "actionData": "Student Card",
       "itemCategory": "KEY_ITEMS",
@@ -54,6 +65,14 @@
         "moveInterval": 2.0,
         "wanderRadius": 3,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Hey, you look like a new student.",
+          "Here, take your Student Card.",
+          "You'll need it to get around campus!"
+        ],
+        "flags": []
       }
     },
     {
@@ -62,16 +81,31 @@
       "visualOffsetY": -12.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "ta.txt",
       "action": "BATTLE",
       "actionData": "Trainer_TA",
       "itemCategory": "GENERAL",
       "flagOnInteract": "met_ta1",
       "movement": {
-        "type": "LOOK_AROUND",
+        "type": "STILL",
         "moveInterval": 1.8,
         "wanderRadius": 1,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Hey! You there!",
+          "Think you know your stuff?",
+          "Let's see what you've got — TA battle!"
+        ],
+        "flags": [
+          {
+            "condition": "met_ta1",
+            "lines": [
+              "Not bad last time.",
+              "Keep training and come back stronger!"
+            ]
+          }
+        ]
       }
     },
     {
@@ -80,7 +114,6 @@
       "visualOffsetY": -8.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "student1.txt",
       "action": "BATTLE",
       "actionData": "Trainer_Student1",
       "itemCategory": "GENERAL",
@@ -90,6 +123,13 @@
         "moveInterval": 3.5,
         "wanderRadius": 2,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "I've been studying battle theory all week.",
+          "Let's see if it pays off!"
+        ],
+        "flags": []
       }
     },
     {
@@ -98,7 +138,6 @@
       "visualOffsetY": -8.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "student1.txt",
       "action": "BATTLE",
       "actionData": "Trainer_Student1",
       "itemCategory": "GENERAL",
@@ -108,6 +147,13 @@
         "moveInterval": 1.8,
         "wanderRadius": 1,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Oh! I didn't see you there.",
+          "Since we've met... battle me!"
+        ],
+        "flags": []
       }
     },
     {
@@ -116,7 +162,6 @@
       "visualOffsetY": -8.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "guard.txt",
       "action": "NONE",
       "actionData": "",
       "itemCategory": "GENERAL",
@@ -129,6 +174,12 @@
           { "x": 18, "y": 15 },
           { "x": 18, "y": 19 }
         ]
+      },
+      "dialogue": {
+        "default": [
+          "Keep moving. Nothing to see here."
+        ],
+        "flags": []
       }
     },
     {
@@ -137,16 +188,102 @@
       "visualOffsetY": -8.0,
       "zIndex": 0.8,
       "dynamicZ": true,
-      "dialogueFile": "roadblock_guard.txt",
       "action": "CHECK_ITEM",
       "actionData": "Student Card",
       "itemCategory": "KEY_ITEMS",
       "flagOnInteract": "roadblock_cleared",
+      "flagToHide": "roadblock_cleared",
       "movement": {
         "type": "STILL",
         "moveInterval": 2.0,
         "wanderRadius": 0,
         "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Hold it right there.",
+          "This area is restricted to students only.",
+          "Show me your Student Card!"
+        ],
+        "flags": [
+          {
+            "condition": "roadblock_cleared",
+            "lines": [
+              "Card checks out. Go right ahead!"
+            ]
+          }
+        ]
+      }
+    },
+        {
+      "id": 108,
+      "texture": "Squirtle",
+      "visualOffsetY": -8.0,
+      "zIndex": 0.84,
+      "dynamicZ": true,
+      "action": "NONE",
+      "actionData": "",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "WANDER",
+        "moveInterval": 3.5,
+        "wanderRadius": 1,
+        "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Squirtle."
+        ],
+        "flags": []
+      }
+    },
+    {
+      "id": 109,
+      "texture": "Brock",
+      "visualOffsetY": -8.0,
+      "zIndex": 0.8,
+      "dynamicZ": true,
+      "action": "BATTLE",
+      "actionData": "Grant",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "STILL",
+        "moveInterval": 1.8,
+        "wanderRadius": 1,
+        "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Oh! I didn't see you there.",
+          "Since we've met... battle me!"
+        ],
+        "flags": []
+      }
+    },
+        {
+      "id": 110,
+      "texture": "Brock",
+      "visualOffsetY": -8.0,
+      "zIndex": 1.8,
+      "dynamicZ": true,
+      "action": "BATTLE",
+      "actionData": "Grant",
+      "itemCategory": "GENERAL",
+      "flagOnInteract": "",
+      "movement": {
+        "type": "LOOK_AROUND",
+        "moveInterval": 1.8,
+        "wanderRadius": 1,
+        "patrolPoints": []
+      },
+      "dialogue": {
+        "default": [
+          "Oh! I didn't see you there.",
+          "Since we've met... battle me!"
+        ],
+        "flags": []
       }
     }
   ]

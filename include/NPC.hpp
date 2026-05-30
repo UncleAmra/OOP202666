@@ -29,26 +29,31 @@ enum class MovementType {
     WANDER,      // Steps randomly within m_WanderRadius tiles of spawn
     PATROL       // Walks a fixed list of waypoints, ping-ponging at each end
 };
-
+// ============================================================
+//  NPCDialogueEntry — one flag-conditional dialogue block
+// ============================================================
+struct NPCDialogueEntry {
+    std::string              condition; // GameFlag key; empty = never matches
+    std::vector<std::string> lines;
+};
 // ============================================================
 //  NPC
 // ============================================================
 class NPC : public Character {
 public:
-    NPC(float x, float y,
-        const std::string& spritePath,
-        const std::string& dialoguePath,
-        const std::string& altDialoguePath = "",
-        const std::string& flagCondition   = "");
+    NPC(float x, float y, const std::string& spritePath);
+
 
     // --------------------------------------------------------
     //  Core overrides
     // --------------------------------------------------------
     glm::vec2 Update(std::shared_ptr<Map> map) override;
 
-    // --------------------------------------------------------
-    //  Interaction
-    // --------------------------------------------------------
+    void SetDialogue(const std::vector<std::string>&      defaultLines,
+                 const std::vector<NPCDialogueEntry>&  conditionalLines) {
+        m_DefaultDialogue     = defaultLines;
+        m_ConditionalDialogue = conditionalLines;
+    }
     // Returns the correct dialogue lines and suppresses re-triggering
     // actions via m_FlagCondition. Call FaceToward() before this.
     //std::vector<std::string> Interact();
@@ -114,8 +119,8 @@ private:
     std::string m_SpritePath;
 
     // ---- Dialogue ----
-    std::vector<std::string> m_DialogueLines;
-    std::vector<std::string> m_AltDialogueLines;
+    std::vector<std::string>      m_DefaultDialogue;
+    std::vector<NPCDialogueEntry> m_ConditionalDialogue;
     std::string              m_FlagCondition;
 
     // ---- Action (fires after dialogue closes) ----

@@ -12,11 +12,10 @@
 #include <unordered_set>
 #include <nlohmann/json.hpp>
 
-
 using json = nlohmann::json;
 
 namespace SaveSystem {
-    // Let's update the extension to .json!
+
     const std::string SAVE_PATH = "savegame.json";
 
     struct GameState {
@@ -29,11 +28,50 @@ namespace SaveSystem {
         std::vector<std::shared_ptr<Pokemon>> party; 
     };
 
+    // ------------------------------------------------------------------
+    // Helper: convert an absolute map path to one relative to RESOURCE_DIR
+    // ------------------------------------------------------------------
+    inline std::string ToRelativeMapPath(const std::string& fullPath) {
+        static const std::string resDir(RESOURCE_DIR);
+        // If the path starts with the resource directory, strip that prefix
+        if (fullPath.rfind(resDir, 0) == 0) {
+            std::string rel = fullPath.substr(resDir.length());
+            // Remove any leading slash or backslash
+            while (!rel.empty() && (rel[0] == '/' || rel[0] == '\\')) {
+                rel.erase(0, 1);
+            }
+            return rel;
+        }
+        // Otherwise (e.g. GENERATED_CAVE) keep the path as is
+        return fullPath;
+    }
+
+    // ------------------------------------------------------------------
+    // Helper: convert a stored relative path back to an absolute one
+    // ------------------------------------------------------------------
+    inline std::string ToAbsoluteMapPath(const std::string& storedPath) {
+        // Already absolute? (Unix '/' or Windows drive letter)
+        if (!storedPath.empty() &&
+            (storedPath[0] == '/' || storedPath[0] == '\\' ||
+             (storedPath.size() >= 2 && storedPath[1] == ':'))) {
+            return storedPath;
+        }
+        // Generated cave names – no physical file, keep unchanged
+        if (storedPath.find("GENERATED_CAVE") == 0) {
+            return storedPath;
+        }
+        // Prepend the current machine’s resource directory
+        return std::string(RESOURCE_DIR) + "/" + storedPath;
+    }
+
+    // ------------------------------------------------------------------
+    // SaveGame – stores the map path relatively
+    // ------------------------------------------------------------------
     inline void SaveGame(const GameState& state) {
         json j;
 
-        // 1. Core Player Data
-        j["mapPath"] = state.mapPath;
+        // 1. Core Player Data (store relative map path)
+        j["mapPath"] = ToRelativeMapPath(state.mapPath);
         j["gridX"] = state.gridX;
         j["gridY"] = state.gridY;
         j["direction"] = state.direction;
@@ -44,7 +82,7 @@ namespace SaveSystem {
             j["flags"][name] = value;
         }
 
-        // 3. Looted Items (nlohmann can serialize unordered_set directly!)
+        // 3. Looted Items
         j["lootedItems"] = state.lootedItems;
 
         // 4. Inventory
@@ -72,23 +110,26 @@ namespace SaveSystem {
             pkmnJson["spd"] = p->GetSpecialDefense();
             pkmnJson["spe"] = p->GetSpeed();
             pkmnJson["exp"] = p->GetCurrentExp();
-            pkmnJson["catchRate"] = p->GetCatchRate(); // Good idea to save this!
+            pkmnJson["catchRate"] = p->GetCatchRate();
             
-            // Moves vector can be dumped straight in
             pkmnJson["moves"] = p->GetMoves(); 
 
             j["party"].push_back(pkmnJson);
         }
 
-        // Write to file with pretty-printing (4 spaces indent)
+        // Write to file
         std::ofstream outFile(SAVE_PATH);
         if (outFile.is_open()) {
             outFile << j.dump(4);
             outFile.close();
-            LOG_INFO("Game Saved as JSON: Map={}, Pos={},{}", state.mapPath, state.gridX, state.gridY);
+            LOG_INFO("Game Saved as JSON: Map={}, Pos={},{}", 
+                     ToRelativeMapPath(state.mapPath), state.gridX, state.gridY);
         }
     }
 
+    // ------------------------------------------------------------------
+    // LoadGame – converts the stored relative path back to absolute
+    // ------------------------------------------------------------------
     inline bool LoadGame(GameState& outState) {
         if (!std::filesystem::exists(SAVE_PATH)) return false;
 
@@ -96,10 +137,10 @@ namespace SaveSystem {
         if (!inFile.is_open()) return false;
 
         json j;
-        inFile >> j; // Parse the entire JSON file in one line!
+        inFile >> j;
 
-        // 1. Core Player Data (Using .value() provides safe defaults if data is missing)
-        outState.mapPath = j.value("mapPath", "");
+        // 1. Core Player Data – reconstruct the absolute map path
+        outState.mapPath = ToAbsoluteMapPath(j.value("mapPath", ""));
         outState.gridX = j.value("gridX", 0);
         outState.gridY = j.value("gridY", 0);
         outState.direction = j.value("direction", 0);
@@ -138,18 +179,15 @@ namespace SaveSystem {
                 int spd = pkmnJson.value("spd", 5);
                 int spe = pkmnJson.value("spe", 5);
                 
-                // Added the 11th argument here to satisfy your constructor!
                 int catchRate = pkmnJson.value("catchRate", 45); 
 
                 auto pkmn = std::make_shared<Pokemon>(
                     name, lvl, t1, t2, mhp, atk, def, spa, spd, spe, catchRate
                 );
                 
-                // Set the volatile stats
                 pkmn->SetCurrentHP(pkmnJson.value("currentHp", mhp));
                 pkmn->SetCurrentExp(pkmnJson.value("exp", 0));
 
-                // Read all moves
                 if (pkmnJson.contains("moves")) {
                     for (const auto& move : pkmnJson["moves"]) {
                         pkmn->LearnMove(move.get<std::string>());
@@ -162,4 +200,4 @@ namespace SaveSystem {
 
         return true;
     }
-}
+} // namespace SaveSystem

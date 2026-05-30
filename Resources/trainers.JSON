@@ -13,6 +13,12 @@
         { "species": "Charizard", "level": 36 },
         { "species": "Totodile", "level": 6 }
       ]
+    },
+        "Grant": {
+      "name": "Grant",
+      "party": [
+        { "species": "Bulbasaur", "level": 16 }
+      ]
     }
   }
 }

@@ -2964,5 +2964,121 @@
         "frame": 0
       }
     ]
+  },
+  {
+    
+    "name": "Move:SCRATCH",
+    "graphic": "PRAS- Slash.png",
+    "position": 1,
+    "position_name": "target",
+    "id": -1,
+    "frames": [
+      [
+        {
+          "pattern": 0,
+          "x": 385,
+          "y": 89,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 150,
+          "focus": 0
+        }
+      ],
+      [
+        {
+          "pattern": 0,
+          "x": 385,
+          "y": 89,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 255,
+          "focus": 0
+        }
+      ],
+      [
+        {
+          "pattern": 1,
+          "x": 385,
+          "y": 97,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 255,
+          "focus": 0
+        }
+      ],
+      [
+        {
+          "pattern": 2,
+          "x": 385,
+          "y": 105,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 255,
+          "focus": 0
+        }
+      ],
+      [
+        {
+          "pattern": 3,
+          "x": 385,
+          "y": 105,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 255,
+          "focus": 0
+        }
+      ],
+      [
+        {
+          "pattern": 4,
+          "x": 385,
+          "y": 105,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 255,
+          "focus": 0
+        }
+      ],
+      [
+        {
+          "pattern": 4,
+          "x": 385,
+          "y": 105,
+          "zoom_x": 100,
+          "zoom_y": 100,
+          "rotation": 0,
+          "mirror": false,
+          "blend_type": 1,
+          "opacity": 150,
+          "focus": 0
+        }
+      ],
+      []
+    ],
+    "timings": [
+      {
+        "type": 0,
+        "frame": 0
+      }
+    ]
+  
   }
 ]

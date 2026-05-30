@@ -13,37 +13,33 @@
 // ============================================================
 //  Constructor
 // ============================================================
-NPC::NPC(float x, float y,
-         const std::string& spritePath,
-         const std::string& dialoguePath,
-         const std::string& altDialoguePath,
-         const std::string& flagCondition)
+NPC::NPC(float x, float y, const std::string& spritePath)
     : Character(x, y)
     , m_SpritePath(spritePath)
-    , m_FlagCondition(flagCondition)
 {
     m_Speed = 100.0f;
+
     // NOTE: m_SpawnGridX/Y are intentionally NOT set here.
-    // Character's grid position is still the default (6,6) at this point.
+    // Character's grid position is still the default at this point.
     // The spawner must call SetGridPosition() then SetSpawnPoint() after construction.
 
     // Stagger first decision so grouped NPCs don't all step simultaneously.
     m_MoveTimer = m_MoveInterval * (0.5f + (rand() % 100) / 100.0f);
 
-    LoadDialogue(dialoguePath,    m_DialogueLines);
-    LoadDialogue(altDialoguePath, m_AltDialogueLines);
     LoadSprites();
 }
-// Inside src/NPC.cpp
 
+// ============================================================
+//  Active state — driven by flagToHide
+// ============================================================
 bool NPC::IsActive() const {
-    // If the NPC has a flag, its active state is inverse to the flag 
-    // (i.e., if "roadblock_cleared" is true, the NPC should NOT be active/visible anymore).
-    if (!m_InteractFlag.empty()) {
-        return !GameFlags::Get(m_InteractFlag);
+    // If the NPC has a hide flag and it's set, the NPC should vanish.
+    if (!m_FlagToHide.empty()) {
+        return !GameFlags::Get(m_FlagToHide);
     }
-    return true; // Default to active if there's no game flag attached
+    return true;
 }
+
 // ============================================================
 //  Update
 // ============================================================
@@ -54,24 +50,30 @@ glm::vec2 NPC::Update(std::shared_ptr<Map> map) {
     }
     SetVisible(true);
 
-    // 1. ALWAYS process on‑going tile movement, and only that.
+    // 1. Always finish any in-progress tile movement first.
     if (m_IsMoving) {
-        glm::vec2 movement = Character::Update(map);   // advance the interpolation
-        m_Transform.translation += movement;           // actually move the sprite
-        return movement;                               // no decisions until the step finishes
-    }
-
-    // 2. Tick decision timer ONLY when idle.
-    float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;
-    m_MoveTimer -= dt;
-    if (m_MoveTimer > 0.0f) {
-        // Idle frame – still call Update for animation (will return 0,0 but keeps sprite alive).
         glm::vec2 movement = Character::Update(map);
-        m_Transform.translation += movement;   // usually zero, but harmless
+        m_Transform.translation += movement;
         return movement;
     }
 
-    // 3. Timer expired → make a movement decision.
+    // 2. Freeze decisions during dialogue — NPC finishes its current step
+    //    then holds still until SetLocked(false) is called.
+    if (m_Locked) {
+        return Character::Update(map);
+    }
+
+    // 3. Tick the decision timer.
+    float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;
+    m_MoveTimer -= dt;
+
+    if (m_MoveTimer > 0.0f) {
+        glm::vec2 movement = Character::Update(map);
+        m_Transform.translation += movement;
+        return movement;
+    }
+
+    // 4. Timer expired — make a movement decision.
     switch (m_MovementType) {
         case MovementType::LOOK_AROUND: DoLookAround(); break;
         case MovementType::WANDER:      DoWander(map);  break;
@@ -79,15 +81,22 @@ glm::vec2 NPC::Update(std::shared_ptr<Map> map) {
         case MovementType::STILL:       break;
     }
 
-    // 4. Reset timer (with jitter).
+    // 5. Reset timer with jitter so NPCs feel organic, not mechanical.
     float jitter = (rand() % 100) / 100.0f * m_MoveInterval * 0.4f;
     m_MoveTimer = m_MoveInterval + jitter;
 
-    // 5. Apply the very first frame of the new movement (started by TryMoveInDirection).
+    // 6. Apply the first frame of any movement started this decision tick.
     glm::vec2 movement = Character::Update(map);
     m_Transform.translation += movement;
     return movement;
 }
+
+// ============================================================
+//  UpdateSprite — NPC override
+//  Does NOT call SetCurrentFrame(0) on idle so the walk cycle
+//  isn't pinned to frame 0 every frame between steps.
+// ============================================================
+
 
 // ============================================================
 //  Interaction
@@ -103,17 +112,19 @@ void NPC::FaceToward(int playerGridX, int playerGridY) {
     }
 }
 
-// Inside src/NPC.cpp
-
 std::vector<std::string> NPC::Interact(const Character& player) {
-    // 1. Flag already set — roadblock permanently cleared, show alt dialogue
-    if (!m_FlagCondition.empty() && GameFlags::Get(m_FlagCondition)) {
-        return m_AltDialogueLines.empty() ? m_DialogueLines : m_AltDialogueLines;
+    FaceToward(player.GetGridX(), player.GetGridY());
+    SetLocked(true);
+
+    // Check flag-conditional dialogue top-to-bottom — first match wins.
+    // This lets you express NPC story progression by ordering entries
+    // from most-progressed to least (e.g. beat_rival_2 before beat_rival_1).
+    for (const auto& entry : m_ConditionalDialogue) {
+        if (!entry.condition.empty() && GameFlags::Get(entry.condition))
+            return entry.lines;
     }
 
-    // 2. Return the appropriate opening dialogue — action is resolved
-    //    by ProcessDialogueState after the player reads through it
-    return m_DialogueLines;
+    return m_DefaultDialogue;
 }
 
 // ============================================================
@@ -144,7 +155,7 @@ static Character::Direction DeltaToDirection(int dx, int dy) {
 // TryMove only sets m_CurrentDirection (movement vector) — it never calls
 // SetDirection, so the sprite would always face DOWN without this wrapper.
 bool NPC::TryMoveInDirection(int dx, int dy, std::shared_ptr<Map> map) {
-    SetDirection(DeltaToDirection(dx, dy)); // face first, always
+    SetDirection(DeltaToDirection(dx, dy));
     return TryMove(dx, dy, map);
 }
 
@@ -198,7 +209,8 @@ void NPC::DoWander(std::shared_ptr<Map> map) {
 
 // PATROL — step toward the current waypoint; ping-pong at each end.
 void NPC::DoPatrol(std::shared_ptr<Map> map) {
-    if (m_PatrolPoints.empty()) return;
+    // Need at least 2 points to form a route worth patrolling.
+    if (m_PatrolPoints.size() < 2) return;
 
     auto [targetX, targetY] = m_PatrolPoints[m_PatrolIndex];
 
@@ -210,7 +222,7 @@ void NPC::DoPatrol(std::shared_ptr<Map> map) {
     else if (targetY < m_GridY) dy = -1;
 
     if (dx == 0 && dy == 0) {
-        // Arrived — advance index.
+        // Arrived at waypoint — advance index with ping-pong logic.
         if (!m_PatrolReverse) {
             ++m_PatrolIndex;
             if (m_PatrolIndex >= static_cast<int>(m_PatrolPoints.size())) {
@@ -228,7 +240,7 @@ void NPC::DoPatrol(std::shared_ptr<Map> map) {
     }
 
     if (!TryMoveInDirection(dx, dy, map)) {
-        // Temporarily blocked (player/another NPC in path) — wait and retry.
+        // Temporarily blocked (player / another NPC in path) — wait and retry.
         DoLookAround();
     }
 }
@@ -269,33 +281,26 @@ void NPC::LoadSprites() {
     const auto leftFrames  = BuildWalkCycle(m_SpritePath + "_Left");
     const auto rightFrames = BuildWalkCycle(m_SpritePath + "_Right");
 
+    // Constructed with play=false — NPCs start idle, Play() is called by
+    // UpdateSprite() only when m_State == MOVING.
     if (!downFrames.empty())
-        m_AnimDown  = std::make_shared<Util::Animation>(downFrames,  true, 150, true, 0);
+        m_AnimDown  = std::make_shared<Util::Animation>(downFrames,  false, 150, true, 0);
     if (!upFrames.empty())
-        m_AnimUp    = std::make_shared<Util::Animation>(upFrames,    true, 150, true, 0);
+        m_AnimUp    = std::make_shared<Util::Animation>(upFrames,    false, 150, true, 0);
     if (!leftFrames.empty())
-        m_AnimLeft  = std::make_shared<Util::Animation>(leftFrames,  true, 150, true, 0);
+        m_AnimLeft  = std::make_shared<Util::Animation>(leftFrames,  false, 150, true, 0);
     if (!rightFrames.empty())
-        m_AnimRight = std::make_shared<Util::Animation>(rightFrames, true, 150, true, 0);
+        m_AnimRight = std::make_shared<Util::Animation>(rightFrames, false, 150, true, 0);
 
     m_CurrentAnimation = m_AnimDown;
     m_Drawable = m_CurrentAnimation;
 }
 
 // ============================================================
-//  Dialogue file loader
+//  LoadDialogue — kept to satisfy the declaration in NPC.hpp.
+//  Dialogue is now loaded from JSON via SetDialogue(); this
+//  method is a no-op and can be removed once NPC.hpp is cleaned up.
 // ============================================================
-void NPC::LoadDialogue(const std::string& path, std::vector<std::string>& out) {
-    if (path.empty()) return;
-
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        LOG_WARN("NPC::LoadDialogue — could not open '{}'", path);
-        return;
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        if (!line.empty()) out.push_back(line);
-    }
+void NPC::LoadDialogue(const std::string& /*path*/, std::vector<std::string>& /*out*/) {
+    // Intentionally empty — dialogue comes from JSON, not flat files.
 }

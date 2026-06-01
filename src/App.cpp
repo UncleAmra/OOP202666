@@ -146,7 +146,7 @@ void App::InitUI() {
 
     m_DialogueUI = std::make_shared<Util::GameObject>();
     m_DialogueText = std::make_shared<Util::Text>(
-        RESOURCE_DIR "/Fonts/micross.ttf", 24, "...", Util::Color(50, 50, 50)
+        RESOURCE_DIR "/Fonts/power clear.ttf", 30, "...", Util::Color(50, 50, 50)
     );
     m_DialogueUI->SetDrawable(m_DialogueText);
     m_DialogueUI->SetZIndex(10.0f);  
@@ -360,6 +360,8 @@ void App::ProcessOverworldUpdateState() {
 
     // D. RANDOM ENCOUNTERS
     HandleOverworldEncounters();
+    m_Map->SetPlayerGridPosition(m_Character->GetGridX(), m_Character->GetGridY());
+
 }
 
 void App::ProcessBattleState() {

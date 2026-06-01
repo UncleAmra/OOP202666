@@ -252,7 +252,7 @@ void Map::LoadNPCsFromJSON(const std::string& path) {
         props.itemCategory   = StringToCategory(entry.value("itemCategory", "GENERAL"));
         props.flagOnInteract = entry.value("flagOnInteract","");
         props.flagToHide     = entry.value("flagToHide",    "");
-
+        props.initialFacing = entry.value("facing", "Down");
         // ── Dialogue ────────────────────────────────────────────────────────
         if (entry.contains("dialogue") && entry["dialogue"].is_object()) {
             const auto& d = entry["dialogue"];
@@ -408,6 +408,14 @@ void Map::SpawnTilesAndProps() {
 
                 npc->SetGridPosition(x, y);
                 npc->SetSpawnPoint(x, y);
+                static const std::unordered_map<std::string, Character::Direction> facingMap = {
+                    {"Down",  Character::Direction::DOWN},
+                    {"Up",    Character::Direction::UP},
+                    {"Left",  Character::Direction::LEFT},
+                    {"Right", Character::Direction::RIGHT}
+                };
+                auto it = facingMap.find(npcProps.initialFacing);
+                if (it != facingMap.end()) npc->SetDirection(it->second);
                 npc->SetZIndex(npcProps.zIndex);
                 npc->SetBaseZIndex(npcProps.zIndex);
                 npc->SetDynamicZ(npcProps.dynamicZ);
@@ -553,6 +561,7 @@ void Map::WarpTo(int gridX, int gridY) {
     float shiftX = GameConfig::CAMERA_START_X + (gridX * GameConfig::EFFECTIVE_TILE_SIZE);
     float shiftY = GameConfig::CAMERA_START_Y - (gridY * GameConfig::EFFECTIVE_TILE_SIZE);
     Move(-shiftX, -shiftY);
+    SetPlayerGridPosition(gridX,gridY);
 }
 
 bool Map::IsWalkable(int x, int y) {
@@ -598,7 +607,10 @@ bool Map::IsWalkable(int x, int y) {
     // 5. Player tile — NPCs cannot walk through the player.
     //    Sentinel -1,-1 is never a valid tile so this is a no-op until
     //    SetPlayerGridPosition() has been called at least once.
+    printf("IsWalkable(%d,%d) player at (%d,%d)\n", x, y, m_PlayerGridX, m_PlayerGridY);
+
     if (m_PlayerGridX == x && m_PlayerGridY == y) {
+        printf("WALK FAILED: Blocked by player!\n");
         return false;
     }
  

@@ -193,11 +193,13 @@
       "itemCategory": "KEY_ITEMS",
       "flagOnInteract": "roadblock_cleared",
       "flagToHide": "roadblock_cleared",
+      "facing": "Left",
       "movement": {
         "type": "STILL",
         "moveInterval": 2.0,
         "wanderRadius": 0,
-        "patrolPoints": []
+        "patrolPoints": [],
+        "facing": "Left"
       },
       "dialogue": {
         "default": [

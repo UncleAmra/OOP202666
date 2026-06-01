@@ -56,7 +56,7 @@ struct NPCProperties {
     ItemCategory itemCategory = ItemCategory::GENERAL;
     std::string  flagOnInteract;
     std::string  flagToHide;
-
+    std::string initialFacing = "Down";
     MovementType             movementType = MovementType::STILL;
     float                    moveInterval = 2.0f;
     int                      wanderRadius = 3;

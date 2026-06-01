@@ -4,76 +4,117 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 
-StartMenu::StartMenu(std::shared_ptr<Util::Renderer> renderer) {
-    // 1. Box Setup (617x720)
+StartMenu::StartMenu(std::shared_ptr<Util::Renderer> renderer)
+    : m_Renderer(renderer)
+{
+    // 1. Box (unchanged)
     m_BoxUI = std::make_shared<Util::GameObject>();
-    auto startBoxImg = ResourceManager::GetImageStore().Get(RESOURCE_DIR "/UI/MenuBoxUI2.png"); 
-    m_BoxUI->SetDrawable(startBoxImg);
-    m_BoxUI->SetZIndex(90.0f); 
-    m_BoxUI->m_Transform.scale = {1.0f, 1.0f}; 
-    m_BoxUI->m_Transform.translation = {331.5f, 0.0f}; 
+    auto boxImg = ResourceManager::GetImageStore().Get(RESOURCE_DIR "/UI/MenuBoxUI2.png");
+    m_BoxUI->SetDrawable(boxImg);
+    m_BoxUI->SetZIndex(90.0f);
+    m_BoxUI->m_Transform.scale = {BOX_SCALE_X, BOX_SCALE_X};
+    m_BoxUI->m_Transform.translation = {BOX_POS_X, BOX_POS_Y};
+    m_Renderer->AddChild(m_BoxUI);
 
-    // 2. Text Setup
-    m_TextUI = std::make_shared<Util::GameObject>();
-    auto menuText = std::make_shared<Util::Text>(
-        RESOURCE_DIR "/Fonts/micross.ttf", 32, 
-        "POKEMON\nBAG\nSAVE\nEXIT", // <-- Added POKEMON to the top!
-        Util::Color(50, 50, 50)
-    );
-    m_TextUI->SetDrawable(menuText);
-    m_TextUI->SetZIndex(91.0f); 
-    m_TextUI->m_Transform.translation = {170.0f, 220.0f}; // You may need to tweak this Y-value slightly to center the taller text block
+    // 2. Text lines – built from m_Items
+    BuildMenuGraphics();
 
-    // 3. Cursor Setup
+    // 3. Cursor
     m_CursorUI = std::make_shared<Util::GameObject>();
-    auto cursorImg = ResourceManager::GetImageStore().Get(RESOURCE_DIR "/UI/Cursor.png"); 
+    auto cursorImg = ResourceManager::GetImageStore().Get(RESOURCE_DIR "/UI/Cursor.png");
     m_CursorUI->SetDrawable(cursorImg);
-    m_CursorUI->m_Transform.scale = {2.5f, 2.5f}; 
-    m_CursorUI->SetZIndex(92.0f); 
+    m_CursorUI->SetZIndex(92.0f);
+    m_CursorUI->m_Transform.scale = {2.5f, 2.5f};
+    m_Renderer->AddChild(m_CursorUI);
 
-    // 4. Add to Renderer and hide by default
-    renderer->AddChild(m_BoxUI);
-    renderer->AddChild(m_TextUI);
-    renderer->AddChild(m_CursorUI);
-    
     SetVisible(false);
+}
+
+void StartMenu::BuildMenuGraphics() {
+    // remove old text objects
+    for (auto& go : m_ItemTexts)
+        m_Renderer->RemoveChild(go);
+    m_ItemTexts.clear();
+
+    for (size_t i = 0; i < m_Items.size(); ++i) {
+        auto go = std::make_shared<Util::GameObject>();
+        auto txt = std::make_shared<Util::Text>(
+            RESOURCE_DIR "/Fonts/micross.ttf", 32,
+            m_Items[i].label,
+            Util::Color(50, 50, 50)
+        );
+        go->SetDrawable(txt);
+        go->SetZIndex(91.0f);
+
+        // Get the width of the rendered text
+        float textWidth = txt->GetSize().x;   // assumes GetSize() returns width and height
+        // Left‑align: centre of the text should be at leftMargin + half its width
+        float posX = TEXT_LEFT_MARGIN + textWidth / 2.0f;
+        // Y: keep your original convention (topmost line at TEXT_START_Y, then move
+        //   upward/negatively for each subsequent line; verify this matches your screen axes)
+        float posY = TEXT_START_Y - static_cast<float>(i) * LINE_SPACING;
+
+        go->m_Transform.translation = {posX, posY};
+        m_Renderer->AddChild(go);
+        m_ItemTexts.push_back(go);
+    }
 }
 
 void StartMenu::SetVisible(bool visible) {
     m_BoxUI->SetVisible(visible);
-    m_TextUI->SetVisible(visible);
+    for (auto& go : m_ItemTexts) go->SetVisible(visible);
     m_CursorUI->SetVisible(visible);
-    
+
     if (visible) {
-        m_CursorIndex = 0; // Always reset cursor to top when opened
+        m_CursorIndex = 0;
         UpdateCursorPosition();
     }
 }
 
-StartMenu::MenuOption StartMenu::Update() {
-    // Handle Navigation
+StartMenu::Option StartMenu::Update() {
+    return ProcessInput();
+}
+
+StartMenu::Option StartMenu::ProcessInput() {
+    // 1. Input cooldown (prevents cursor from flying)
+    if (m_InputTimer > 0) {
+        --m_InputTimer;
+        // Still allow immediate action keys (cancel, select) even during cooldown? 
+        // For safety, only allow them when timer is 0, but you can adjust.
+        // Here we check after cooldown only.
+        return Option::NONE;
+    }
+
+    // 2. Navigation
     if (Util::Input::IsKeyDown(Util::Keycode::UP) || Util::Input::IsKeyDown(Util::Keycode::W)) {
-        m_CursorIndex--;
-        if (m_CursorIndex < 0) m_CursorIndex = MAX_OPTIONS - 1; 
+        m_CursorIndex = (m_CursorIndex - 1 + m_Items.size()) % m_Items.size();
         UpdateCursorPosition();
+        m_InputTimer = INPUT_COOLDOWN;
     }
-    if (Util::Input::IsKeyDown(Util::Keycode::DOWN) || Util::Input::IsKeyDown(Util::Keycode::S)) {
-        m_CursorIndex++;
-        if (m_CursorIndex >= MAX_OPTIONS) m_CursorIndex = 0; 
+    else if (Util::Input::IsKeyDown(Util::Keycode::DOWN) || Util::Input::IsKeyDown(Util::Keycode::S)) {
+        m_CursorIndex = (m_CursorIndex + 1) % m_Items.size();
         UpdateCursorPosition();
+        m_InputTimer = INPUT_COOLDOWN;
     }
 
-    // Handle Selection
+    // 3. Selection
     if (Util::Input::IsKeyDown(Util::Keycode::RETURN) || Util::Input::IsKeyDown(Util::Keycode::Z)) {
-        return static_cast<MenuOption>(m_CursorIndex);
+        return m_Items[m_CursorIndex].value;
     }
 
-    return MenuOption::NONE; // Nothing selected this frame
+    // 4. Cancel / close menu
+    if (Util::Input::IsKeyDown(Util::Keycode::ESCAPE) || Util::Input::IsKeyDown(Util::Keycode::X)) {
+        return Option::CANCEL;
+    }
+
+    return Option::NONE;
 }
 
 void StartMenu::UpdateCursorPosition() {
-    float cursorBaseY = 280.0f;   
-    float cursorSpacing = 40.0f;  
-    float cursorX = 60.0f;       
-    m_CursorUI->m_Transform.translation = {cursorX, cursorBaseY - (m_CursorIndex * cursorSpacing)};
+    if (m_CursorIndex < 0 || m_CursorIndex >= static_cast<int>(m_ItemTexts.size()))
+        return;
+
+    float textY = m_ItemTexts[m_CursorIndex]->m_Transform.translation.y;
+    // Place the cursor to the left of the text; adjust vertical fine‑tuning as needed
+    m_CursorUI->m_Transform.translation = {TEXT_LEFT_MARGIN - 20.0f, textY + 5.0f};
 }

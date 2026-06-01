@@ -276,37 +276,57 @@ void App::ProcessDialogueState() {
 }
 
 void App::ProcessStartMenuState() {
-    StartMenu::MenuOption selection = m_StartMenu->Update();
-    
-    if (selection == StartMenu::MenuOption::POKEMON) {
-        LOG_TRACE("Selected: POKEMON");
-        m_CurrentState = State::POKEMON_MENU;
-        m_StartMenu->SetVisible(false);
-        m_PokemonMenu->Show(m_Character->GetParty());
-    }
-    else if (selection == StartMenu::MenuOption::BAG) {
-        LOG_TRACE("Selected: BAG");
-        m_CurrentState = State::INVENTORY_MENU; 
-        m_StartMenu->SetVisible(false);
-        
-        std::map<ItemCategory, std::vector<std::pair<std::string, int>>> sortedInventory;
-        sortedInventory[ItemCategory::GENERAL] = {};
-        sortedInventory[ItemCategory::POKEBALLS] = {};
-        sortedInventory[ItemCategory::KEY_ITEMS] = {};
-        
-        for (const auto& [itemName, invData] : m_Character->GetInventory()) {
-            sortedInventory[invData.category].push_back({itemName, invData.quantity});
+    StartMenu::Option selection = m_StartMenu->Update();
+
+    switch (selection) {
+        case StartMenu::Option::POKEMON: {
+            LOG_TRACE("Selected: POKEMON");
+            m_CurrentState = State::POKEMON_MENU;
+            m_StartMenu->SetVisible(false);
+            m_PokemonMenu->Show(m_Character->GetParty());
+            break;
         }
-        m_InventoryMenu->Show(sortedInventory);
-    } 
-    else if (selection == StartMenu::MenuOption::SAVE) {
-        LOG_TRACE("Selected: SAVE");
-        PerformQuickSave(); // Reused optimized method
-        CloseAllMenus(); 
-    } 
-    else if (selection == StartMenu::MenuOption::EXIT) {
-        LOG_TRACE("Selected: EXIT");
-        m_CurrentState = State::END; 
+
+        case StartMenu::Option::BAG: {
+            LOG_TRACE("Selected: BAG");
+            m_CurrentState = State::INVENTORY_MENU;
+            m_StartMenu->SetVisible(false);
+
+            // Prepare inventory sorted by category
+            std::map<ItemCategory, std::vector<std::pair<std::string, int>>> sorted;
+            sorted[ItemCategory::GENERAL]    = {};
+            sorted[ItemCategory::POKEBALLS]  = {};
+            sorted[ItemCategory::KEY_ITEMS]  = {};
+
+            for (const auto& [itemName, invData] : m_Character->GetInventory()) {
+                sorted[invData.category].push_back({itemName, invData.quantity});
+            }
+            m_InventoryMenu->Show(sorted);
+            break;
+        }
+
+        case StartMenu::Option::SAVE: {
+            LOG_TRACE("Selected: SAVE");
+            PerformQuickSave();
+            CloseAllMenus();   // returns to UPDATE state
+            break;
+        }
+
+        case StartMenu::Option::EXIT: {
+            LOG_TRACE("Selected: EXIT");
+            m_CurrentState = State::END;
+            break;
+        }
+
+        case StartMenu::Option::CANCEL: {
+            LOG_TRACE("StartMenu cancelled");
+            CloseAllMenus();   // hides everything, goes back to overworld
+            break;
+        }
+
+        case StartMenu::Option::NONE:
+        default:
+            break; // no action selected this frame
     }
 }
 
@@ -499,20 +519,17 @@ void App::HandleOverworldEncounters() {
 // ==========================================
 
 void App::HandleGlobalShortcuts() {
+    // Toggle start menu
     if (Util::Input::IsKeyDown(Util::Keycode::I)) {
         if (m_CurrentState == State::UPDATE) {
             OpenStartMenu();
+        } else if (m_CurrentState == State::START_MENU) {
+            CloseAllMenus();
         }
-        else if (m_CurrentState == State::START_MENU) {
-            CloseAllMenus();
-        } 
     }
-
+    // For sub‑menus, still allow Escape/X to go back to start menu
     if (Util::Input::IsKeyDown(Util::Keycode::X) || Util::Input::IsKeyDown(Util::Keycode::ESCAPE)) {
-        if (m_CurrentState == State::START_MENU) {
-            CloseAllMenus();
-        } 
-        else if (m_CurrentState == State::POKEMON_MENU || m_CurrentState == State::INVENTORY_MENU) {
+        if (m_CurrentState == State::POKEMON_MENU || m_CurrentState == State::INVENTORY_MENU) {
             ReturnToStartMenu();
         }
     }
